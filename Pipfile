@@ -6,8 +6,10 @@ verify_ssl = true
 [dev-packages]
 black = "==19.10b0"
 isort = "*"
+pytest = "*"
 
 [packages]
+numpy = "*"
 
 [requires]
 python_version = "3.7"

@@ -4,8 +4,7 @@ from bopy.bounds import Bound, Bounds
 
 
 def test_lower_must_be_less_than_upper_bound():
-    Bound(lower=0.0, upper=1.0)
-
+    # ACT/ASSERT
     with raises(ValueError):
         Bound(lower=1.0, upper=0.0)
 

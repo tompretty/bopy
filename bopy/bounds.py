@@ -35,6 +35,11 @@ class Bounds:
     bounds: List[Bound]
 
     @property
+    def n_dimensions(self) -> int:
+        """Get the number of dimensions"""
+        return len(self.bounds)
+
+    @property
     def lowers(self) -> List[float]:
         """Get a list of lower bounds."""
         return [b.lower for b in self.bounds]

@@ -10,6 +10,17 @@ def test_lower_must_be_less_than_upper_bound():
         Bound(lower=1.0, upper=0.0)
 
 
+def test_n_dimensions_returns_the_number_of_dimensions():
+    # ARRANGE
+    n_dimensions = 10
+
+    # ACT
+    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0) for _ in range(n_dimensions)])
+
+    # ASSERT
+    assert bounds.n_dimensions == n_dimensions
+
+
 def test_lowers_returns_list_of_lower_bounds():
     # ARRANGE
     lowers = [0.0, 1.0, 2.0]

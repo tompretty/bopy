@@ -34,6 +34,10 @@ class Bounds:
 
     bounds: List[Bound]
 
+    def __post_init__(self):
+        if len(self.bounds) < 1:
+            raise ValueError("`bounds` must contain at least one bound.")
+
     @property
     def n_dimensions(self) -> int:
         """Get the number of dimensions"""

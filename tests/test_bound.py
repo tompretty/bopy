@@ -10,6 +10,12 @@ def test_lower_must_be_less_than_upper_bound():
         Bound(lower=1.0, upper=0.0)
 
 
+def test_bounds_requires_at_leas_one_bound():
+    # ACT/ASSERT
+    with raises(ValueError, match="`bounds` must contain at least one bound."):
+        Bounds(bounds=[])
+
+
 def test_n_dimensions_returns_the_number_of_dimensions():
     # ARRANGE
     n_dimensions = 10

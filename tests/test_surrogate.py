@@ -8,7 +8,7 @@ from bopy.exceptions import NotFittedError
 from bopy.surrogate import ScipyGPSurrogate
 
 
-def test_x_must_contain_at_least_one_sample():
+def test_training_data_must_contain_at_least_one_sample():
     # ARRANGE
     x, y = np.array([]), np.array([])
 
@@ -20,7 +20,7 @@ def test_x_must_contain_at_least_one_sample():
         surrogate.fit(x, y)
 
 
-def test_x_and_y_must_be_same_size():
+def test_training_input_and_target_must_be_the_same_size():
     # ARRANGE
     n_dimensions = 10
     n_samples_x = 15
@@ -39,7 +39,7 @@ def test_x_and_y_must_be_same_size():
         surrogate.fit(x, y)
 
 
-def test_x_must_be_2d():
+def test_training_input_must_be_2d():
     # ARRANGE
     x, y = np.array([[[1]]]), np.array([1])
 
@@ -51,7 +51,7 @@ def test_x_must_be_2d():
         surrogate.fit(x, y)
 
 
-def test_y_must_be_1d():
+def test_training_target_must_be_1d():
     # ARRANGE
     x, y = np.array([[1]]), np.array([[1]])
 
@@ -97,7 +97,7 @@ def test_predict_returns_correct_dimensions():
     assert sigma.shape == (n_samples, n_samples)
 
 
-def test_predict_x_contains_at_least_one_point():
+def test_test_input_contains_at_least_one_sample():
     # ARRANGE
     n_dimensions = 10
     n_samples = 100
@@ -114,7 +114,7 @@ def test_predict_x_contains_at_least_one_point():
         surrogate.predict(x_test)
 
 
-def test_predict_x_is_2d():
+def test_test_input_must_be_2d():
     # ARRANGE
     n_dimensions = 10
     n_samples = 100
@@ -131,7 +131,7 @@ def test_predict_x_is_2d():
         surrogate.predict(x_test)
 
 
-def test_predict_x_requires_the_same_number_of_dimensions_as_fit_x():
+def test_test_input_must_have_same_number_of_dimensions_as_training_input():
     # ARRANGE
     n_dimensions_train = 10
     n_samples_train = 100
@@ -174,7 +174,7 @@ def test_noise_free_gps_interpolate_the_training_data():
     assert np.allclose(0, stds)
 
 
-def test_gps_return_to_prior_far_away_from_the_training_data():
+def test_gps_return_to_the_prior_far_away_from_the_training_data():
     # ARRANGE
     n_dimensions = 1
     n_samples = 10

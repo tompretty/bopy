@@ -55,3 +55,20 @@ class EI(AcquisitionFunction):
         return -var * norm.pdf(self._eta, loc=mean, scale=std) + (
             mean - self._eta
         ) * norm.cdf(self._eta, loc=mean, scale=std)
+
+
+class POI(AcquisitionFunction):
+    """Probability of improvement acquisition function.
+
+    POI implements the rule:
+        `poi(x) = p(f(x) > eta)`
+    """
+
+    def __init__(self):
+        self._eta = 0
+
+    def _f(self, mean: np.ndarray, sigma: np.ndarray):
+        var = np.diag(sigma)
+        std = np.sqrt(var)
+
+        return -norm.cdf(self._eta, mean, std)

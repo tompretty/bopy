@@ -4,11 +4,11 @@ from sklearn.datasets import make_regression
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 
-from bopy.acquisition import EI, UCB
+from bopy.acquisition import EI, POI, UCB
 from bopy.surrogate import ScipyGPSurrogate
 
 
-@pytest.mark.parametrize("acquisition", [EI(), UCB()])
+@pytest.mark.parametrize("acquisition", [EI(), UCB(), POI()])
 def test_output_dimensions_are_correct(acquisition):
     # ARRANGE
     n_dimensions = 1

@@ -12,6 +12,7 @@ pytest = "*"
 numpy = "*"
 sobol-seq = "*"
 pydoe = "*"
+scikit-learn = "*"
 
 [requires]
 python_version = "3.7"

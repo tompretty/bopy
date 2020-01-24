@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import norm
 
 from .surrogate import Surrogate
 
@@ -35,3 +36,22 @@ class UCB(AcquisitionFunction):
 
     def _f(self, mean: np.ndarray, sigma: np.ndarray) -> np.ndarray:
         return mean + self.kappa * np.diag(sigma)
+
+
+class EI(AcquisitionFunction):
+    """Expected improvement acquisition function.
+
+    EI implements the rule:
+        `ei(x) = E[|eta - f(x)|+]`
+    """
+
+    def __init__(self):
+        self._eta = 0
+
+    def _f(self, mean: np.ndarray, sigma: np.ndarray):
+        var = np.diag(sigma)
+        std = np.sqrt(var)
+
+        return -var * norm.pdf(self._eta, loc=mean, scale=std) + (
+            mean - self._eta
+        ) * norm.cdf(self._eta, loc=mean, scale=std)

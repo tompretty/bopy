@@ -6,7 +6,7 @@ from scipy.stats import norm
 from .exceptions import NotFittedError
 from .surrogate import Surrogate
 
-__all__ = ["UCB", "EI", "POI"]
+__all__ = ["LCB", "EI", "POI"]
 
 
 class AcquisitionFunction(ABC):
@@ -62,16 +62,16 @@ class AcquisitionFunction(ABC):
         pass
 
 
-class UCB(AcquisitionFunction):
-    """Upper confidence bound acquisition function.
+class LCB(AcquisitionFunction):
+    """Lower confidence bound acquisition function.
 
-    UCB implements the simple rule:
-        `ucb(x) = mean + kappa * std`
+    LCB implements the simple rule:
+        `lcb(x) = -mean - kappa * std`
 
     Parameters
     ----------
     kappa: float
-        The number of stds we add to the mean.
+        The number of stds we subtract from the mean.
     """
 
     def __init__(self, kappa: float = 2.0):
@@ -79,7 +79,7 @@ class UCB(AcquisitionFunction):
         self.kappa = kappa
 
     def _f(self, mean: np.ndarray, sigma: np.ndarray) -> np.ndarray:
-        return mean + self.kappa * np.diag(sigma)
+        return -mean - self.kappa * np.diag(sigma)
 
 
 class EI(AcquisitionFunction):

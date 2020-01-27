@@ -4,12 +4,12 @@ from sklearn.datasets import make_regression
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 
-from bopy.acquisition import EI, POI, UCB
+from bopy.acquisition import EI, LCB, POI
 from bopy.exceptions import NotFittedError
 from bopy.surrogate import ScipyGPSurrogate
 
 
-@pytest.mark.parametrize("acquisition", [EI(), UCB(), POI()])
+@pytest.mark.parametrize("acquisition", [EI(), LCB(), POI()])
 def test_fit_must_be_called_before_evaluating(acquisition):
     # ARRANGE
     n_dimensions = 1
@@ -26,7 +26,7 @@ def test_fit_must_be_called_before_evaluating(acquisition):
         acquisition(surrogate, x)
 
 
-@pytest.mark.parametrize("acquisition", [EI(), UCB(), POI()])
+@pytest.mark.parametrize("acquisition", [EI(), LCB(), POI()])
 def test_output_dimensions_are_correct(acquisition):
     # ARRANGE
     n_dimensions = 1

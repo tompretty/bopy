@@ -6,12 +6,19 @@ from scipy.stats import norm
 from .exceptions import NotFittedError
 from .surrogate import Surrogate
 
+__all__ = ["LCB", "EI", "POI"]
+
 
 class AcquisitionFunction(ABC):
     """An acquisition function.
 
     Acquisition functions navigate the exploration-exploitation
-    trade off during optimization.
+    trade off during optimization. The convention here is that
+    acquistion functions are to be minimized. We should thus
+    think of them as representing expected loss, rather than
+    expected utility.
+
+    This class shouldn't be used directly, use a derived class instead.
     """
 
     def __init__(self):
@@ -60,16 +67,16 @@ class AcquisitionFunction(ABC):
         pass
 
 
-class UCB(AcquisitionFunction):
-    """Upper confidence bound acquisition function.
+class LCB(AcquisitionFunction):
+    """Lower confidence bound acquisition function.
 
-    UCB implements the simple rule:
-        `ucb(x) = mean + kappa * std`
+    LCB implements the simple rule:
+        `lcb(x) = mean - kappa * std`
 
     Parameters
     ----------
     kappa: float
-        The number of stds we add to the mean.
+        The number of stds we subtract from the mean.
     """
 
     def __init__(self, kappa: float = 2.0):
@@ -77,14 +84,14 @@ class UCB(AcquisitionFunction):
         self.kappa = kappa
 
     def _f(self, mean: np.ndarray, sigma: np.ndarray) -> np.ndarray:
-        return mean + self.kappa * np.diag(sigma)
+        return mean - self.kappa * np.sqrt(np.diag(sigma))
 
 
 class EI(AcquisitionFunction):
     """Expected improvement acquisition function.
 
     EI implements the rule:
-        `ei(x) = E[|eta - f(x)|+]`
+        `ei(x) = -E[|eta - f(x)|+]`
     """
 
     def __init__(self):
@@ -107,7 +114,7 @@ class POI(AcquisitionFunction):
     """Probability of improvement acquisition function.
 
     POI implements the rule:
-        `poi(x) = p(f(x) > eta)`
+        `poi(x) = p(f(x) >= eta)`
     """
 
     def __init__(self):
@@ -118,7 +125,7 @@ class POI(AcquisitionFunction):
         var = np.diag(sigma)
         std = np.sqrt(var)
 
-        return -norm.cdf(self._eta, mean, std)
+        return 1 - norm.cdf(self._eta, mean, std)
 
     def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
         self._eta = np.min(y)

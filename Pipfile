@@ -13,6 +13,8 @@ numpy = "*"
 sobol-seq = "*"
 pydoe = "*"
 scikit-learn = "*"
+matplotlib = "*"
+seaborn = "*"
 
 [requires]
 python_version = "3.7"

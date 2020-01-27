@@ -43,6 +43,25 @@ class Optimizer(ABC):
         surrogate: Surrogate,
         bounds: Bounds,
     ) -> OptimizationResult:
+        """Optimize an acquisition function.
+
+        Optimizes the `acquisition_function` over the `surrogate`
+        model, within the `bounds`.
+
+        Parameters
+        ----------
+        acquisition_function: AcquisitionFunction
+            The acquisition function.
+        surrogate: Surrogate
+            The surrogate model.
+        bounds: Bounds
+            The parameter bounds.
+
+        Returns
+        -------
+        optimization_result: OptimizationResult
+            The result of optimization.
+        """
         x_min, f_min = self._optimize(acquisition_function, surrogate, bounds)
         return OptimizationResult(x_min=x_min, f_min=f_min)
 
@@ -57,6 +76,19 @@ class Optimizer(ABC):
 
 
 class DirectOptimizer(Optimizer):
+    """Direct acquisition function Optimizer.
+
+    This is a wrapper around the DIRECT
+    global optimizer.
+
+    Parameters
+    ----------
+    direct_args
+        Args passed to DIRECT.solve
+    direct_kwargs
+        Kwargs passed to DIRECT.solve
+    """
+
     def __init__(self, *direct_args, **direct_kwargs):
         self.direct_args = direct_args
         self.direct_kwargs = direct_kwargs

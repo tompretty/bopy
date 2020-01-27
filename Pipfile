@@ -15,6 +15,7 @@ pydoe = "*"
 scikit-learn = "*"
 matplotlib = "*"
 seaborn = "*"
+direct = "*"
 
 [requires]
 python_version = "3.7"

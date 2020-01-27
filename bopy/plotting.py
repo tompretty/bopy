@@ -4,6 +4,7 @@ import seaborn as sns
 
 from .acquisition import AcquisitionFunction
 from .bounds import Bound
+from .optimizer import OptimizationResult
 from .surrogate import Surrogate
 
 sns.set_style("darkgrid")
@@ -83,3 +84,24 @@ def plot_acquisition_function_1D(
     a_x = acquisition_function(surrogate, x)
 
     ax.plot(x.flatten(), a_x, label="acquisition function")
+
+
+def plot_optimization_result_1D(
+    ax: plt.Axes, optimization_result: OptimizationResult
+) -> None:
+    """Plot a 1D optimization result.
+
+    Parameters
+    ----------
+    ax: plt.Axes
+        matplotlib axes object on which
+        to plot the graph.
+    optimization_result:
+        The optimization result.
+    """
+    ax.plot(
+        optimization_result.x_min,
+        optimization_result.f_min,
+        "r+",
+        label="acquisition function min",
+    )

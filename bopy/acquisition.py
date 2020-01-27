@@ -6,6 +6,8 @@ from scipy.stats import norm
 from .exceptions import NotFittedError
 from .surrogate import Surrogate
 
+__all__ = ["UCB", "EI", "POI"]
+
 
 class AcquisitionFunction(ABC):
     """An acquisition function.

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d5eb0ccaf0e9ccc18e1f9b9d3b7ab26d6b1dbe0ef46d1969b85742061a4f3330"
+            "sha256": "51bdb4d750dba0550be3265002a694a72d3ccef356fdcfeaaa44f66f789ab9a1"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,6 +16,10 @@
         ]
     },
     "default": {
+        "bopy": {
+            "editable": true,
+            "path": "."
+        },
         "cycler": {
             "hashes": [
                 "sha256:1d8a5ae1ff6c5cf9b93e8811e581232ad8920aeec647c37316ceac982b08cb2d",

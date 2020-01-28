@@ -16,6 +16,7 @@ scikit-learn = "*"
 matplotlib = "*"
 seaborn = "*"
 direct = "*"
+bopy = {editable = true,path = "."}
 
 [requires]
 python_version = "3.7"

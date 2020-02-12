@@ -46,7 +46,7 @@ class BayesOpt:
 
     def run_trials(self, n_trials: int = 10):
         for _ in range(n_trials):
-            self.run_trials()
+            self.run_trial()
 
     def run_trial(self):
         result = self.optimizer.optimize(

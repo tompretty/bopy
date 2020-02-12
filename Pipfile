@@ -7,6 +7,8 @@ verify_ssl = true
 black = "==19.10b0"
 isort = "*"
 pytest = "*"
+jupyter = "*"
+ipython = "*"
 
 [packages]
 numpy = "*"
@@ -17,6 +19,7 @@ matplotlib = "*"
 seaborn = "*"
 direct = "*"
 bopy = {editable = true,path = "."}
+gpy = "*"
 
 [requires]
 python_version = "3.7"

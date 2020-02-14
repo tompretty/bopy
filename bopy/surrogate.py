@@ -1,5 +1,6 @@
 from typing import Callable, Tuple
 
+import GPy
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.preprocessing import StandardScaler
@@ -145,14 +146,18 @@ class GPyGPSurrogate(Surrogate):
 
     Parameters
     ----------
-    gp_initizlizer: Callable
+    gp_initizlizer: Callable[[np.ndarray, np.ndarray] -> GPy.models.GPRegression]
         A function that accepts training data and
         returns a GPy GP model.
     n_restarts: Integer (default = 1)
         The number of restarts during optimization.
     """
 
-    def __init__(self, gp_initializer, n_restarts=1):
+    def __init__(
+        self,
+        gp_initializer: Callable[[np.ndarray, np.ndarray], GPy.models.GPRegression],
+        n_restarts: int = 1,
+    ):
         super().__init__()
         self.gp_initializer = gp_initializer
         self.n_restarts = n_restarts

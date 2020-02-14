@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Callable, Tuple
 
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -101,3 +101,62 @@ class ScipyGPSurrogate(Surrogate):
 
     def _predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         return self.gp.predict(x, return_cov=True)
+
+
+class ScipyGPSurrogate(Surrogate):
+    """Scikit-learn GP Surrogate.
+
+    This is a wrapper around the scikit-learn
+    GaussianProcessRegressor model.
+
+    Parameters
+    ----------
+    gp: GaussianProcessRegressor
+        The scikit-learn GP regressor.
+    """
+
+    def __init__(self, gp: GaussianProcessRegressor):
+        super().__init__()
+        self.gp = gp
+
+    def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
+        self.gp.fit(x, y)
+
+    def _predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        return self.gp.predict(x, return_cov=True)
+
+
+class GPyGPSurrogate(Surrogate):
+    """GPy GP Surrogate.
+
+    This is a wrapper around the GPy
+    GPRegression model.
+
+    Parameters
+    ----------
+    gp: GaussianProcessRegressor
+        The scikit-learn GP regressor.
+    """
+
+    def __init__(self, gp_initializer, n_restarts=1):
+        super().__init__()
+        self.gp_initializer = gp_initializer
+        self.n_restarts = n_restarts
+        self.gp = None
+
+    def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
+        self._update_gp(x, y.reshape(-1, 1))
+        self._optimize_gp()
+
+    def _predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        mu, sigma = self.gp.predict(x, full_cov=True)
+        return mu.flatten(), sigma
+
+    def _update_gp(self, x: np.ndarray, y: np.ndarray):
+        if self.gp is None:
+            self.gp = self.gp_initializer(x, y)
+        else:
+            self.gp.set_XY(x, y)
+
+    def _optimize_gp(self):
+        self.gp.optimize_restarts(self.n_restarts)

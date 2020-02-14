@@ -1,3 +1,4 @@
+import GPy
 import numpy as np
 import pytest
 from sklearn.datasets import make_regression
@@ -5,7 +6,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 
 from bopy.exceptions import NotFittedError
-from bopy.surrogate import ScipyGPSurrogate
+from bopy.surrogate import GPyGPSurrogate, ScipyGPSurrogate
 
 
 def test_training_data_must_contain_at_least_one_sample():
@@ -195,3 +196,43 @@ def test_gps_return_to_the_prior_far_away_from_the_training_data():
     # ASSERT
     assert np.allclose(0, y_pred)
     assert np.allclose(stds[0], stds[1])
+
+
+def gpy_gp_surrogate():
+    def gp_initializer(x, y):
+        return GPy.models.GPRegression(
+            x, y, kernel=GPy.kern.RBF(input_dim=1), noise_var=1e-5, normalizer=True
+        )
+
+    return GPyGPSurrogate(gp_initializer=gp_initializer)
+
+
+def test_GPyGPSurrogate_instantiates_a_gp_after_calling_fit():
+    # ARRANGE
+    n_dimensions = 1
+    n_samples = 100
+    x, y = make_regression(n_samples, n_dimensions)
+    surrogate = gpy_gp_surrogate()
+
+    # ACT
+    surrogate.fit(x, y)
+
+    # ASSERT
+    assert surrogate.gp is not None
+
+
+def test_GPyGPSurrogate_updates_data_on_second_call_to_fit():
+    # ARRANGE
+    n_dimensions = 1
+    n_samples = 100
+    x1, y1 = make_regression(n_samples, n_dimensions)
+    x2, y2 = make_regression(n_samples, n_dimensions)
+    surrogate = gpy_gp_surrogate()
+    surrogate.fit(x1, y1)
+
+    # ACT
+    surrogate.fit(x2, y2)
+
+    # ASSERT
+    assert np.array_equal(surrogate.gp.X, x2)
+    assert np.array_equal(surrogate.gp.Y, y2.reshape(-1, 1))

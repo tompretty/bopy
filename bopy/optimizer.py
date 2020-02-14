@@ -16,7 +16,7 @@ class OptimizationResult:
 
     Parameters
     ----------
-    x_min: np.ndarray of shape (n_dimensions,)
+    x_min: np.ndarray of shape (n_dimensions, 1)
         The argmin.
     f_min: float
         The min.
@@ -110,4 +110,4 @@ class DirectOptimizer(Optimizer):
             **self.direct_kwargs
         )
 
-        return np.array(x_min), f_min
+        return np.array([x_min]), f_min

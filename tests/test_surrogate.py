@@ -49,7 +49,7 @@ def test_training_data_must_contain_at_least_one_sample(surrogate):
 @pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
 def test_training_input_and_target_must_be_the_same_size(surrogate):
     # ARRANGE
-    n_dimensions = 10
+    n_dimensions = 1
     n_samples_x = 15
     n_samples_y = 5
 
@@ -86,7 +86,7 @@ def test_training_target_must_be_1d(surrogate):
 @pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
 def test_fit_must_be_called_before_predict(surrogate):
     # ARRANGE
-    n_dimensions = 10
+    n_dimensions = 1
     n_samples = 100
 
     x, y = make_regression(n_samples, n_dimensions)
@@ -99,7 +99,7 @@ def test_fit_must_be_called_before_predict(surrogate):
 @pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
 def test_predict_returns_correct_dimensions(surrogate):
     # ARRANGE
-    n_dimensions = 10
+    n_dimensions = 1
     n_samples = 100
 
     x, y = make_regression(n_samples, n_dimensions)
@@ -117,7 +117,7 @@ def test_predict_returns_correct_dimensions(surrogate):
 @pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
 def test_test_input_contains_at_least_one_sample(surrogate):
     # ARRANGE
-    n_dimensions = 10
+    n_dimensions = 1
     n_samples = 100
 
     x_train, y_train = make_regression(n_samples, n_dimensions)
@@ -133,7 +133,7 @@ def test_test_input_contains_at_least_one_sample(surrogate):
 @pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
 def test_test_input_must_be_2d(surrogate):
     # ARRANGE
-    n_dimensions = 10
+    n_dimensions = 1
     n_samples = 100
 
     x_train, y_train = make_regression(n_samples, n_dimensions)
@@ -149,10 +149,10 @@ def test_test_input_must_be_2d(surrogate):
 @pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
 def test_test_input_must_have_same_number_of_dimensions_as_training_input(surrogate):
     # ARRANGE
-    n_dimensions_train = 10
-    n_samples_train = 100
+    n_dimensions_train = 1
+    n_samples_train = 10
 
-    n_dimensions_test = 100
+    n_dimensions_test = 15
     n_samples_test = 10
 
     x_train, y_train = make_regression(n_samples_train, n_dimensions_train)
@@ -214,7 +214,7 @@ def test_gps_return_to_the_prior_far_away_from_the_training_data(surrogate):
 def test_GPyGPSurrogate_instantiates_a_gp_after_calling_fit():
     # ARRANGE
     n_dimensions = 1
-    n_samples = 100
+    n_samples = 10
     x, y = make_regression(n_samples, n_dimensions)
     surrogate = gpy_gp_surrogate()
 
@@ -228,7 +228,7 @@ def test_GPyGPSurrogate_instantiates_a_gp_after_calling_fit():
 def test_GPyGPSurrogate_updates_data_on_second_call_to_fit():
     # ARRANGE
     n_dimensions = 1
-    n_samples = 100
+    n_samples = 10
     x1, y1 = make_regression(n_samples, n_dimensions)
     x2, y2 = make_regression(n_samples, n_dimensions)
     surrogate = gpy_gp_surrogate()

@@ -7,7 +7,7 @@ from .acquisition import AcquisitionFunction
 from .bounds import Bounds
 from .callback import Callback
 from .initial_design import InitialDesign
-from .optimizer import Optimizer, OptimizationResult
+from .optimizer import OptimizationResult, Optimizer
 from .surrogate import Surrogate
 
 __all__ = ["BayesOpt"]
@@ -230,6 +230,7 @@ class BayesOpt:
         )
 
     def optimize_acquisition(self) -> OptimizationResult:
+        """Optimize the acquisition function."""
         result = self.optimizer.optimize(
             self.acquisition_function, self.surrogate, self.bounds
         )
@@ -238,14 +239,17 @@ class BayesOpt:
         return result
 
     def update_surrogate(self) -> None:
+        """Update the surrogate model."""
         self.surrogate.fit(self.x, self.y)
         self.dispatch("on_surrogate_updated", self)
 
     def update_acquisition(self) -> None:
+        """Update the acquisition function."""
         self.acquisition_function.fit(self.x, self.y)
         self.dispatch("on_acquisition_updated", self)
 
     def dispatch(self, event: str, *args: List[Any]) -> None:
+        """Dispatch `event` callback with `args` arguments."""
         if self.callbacks:
             for callback in self.callbacks:
                 getattr(callback, event)(*args)

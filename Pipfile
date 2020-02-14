@@ -17,6 +17,7 @@ matplotlib = "*"
 seaborn = "*"
 direct = "*"
 bopy = {editable = true,path = "."}
+gpy = "*"
 
 [requires]
 python_version = "3.7"

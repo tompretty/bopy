@@ -129,13 +129,27 @@ class ScipyGPSurrogate(Surrogate):
 class GPyGPSurrogate(Surrogate):
     """GPy GP Surrogate.
 
-    This is a wrapper around the GPy
-    GPRegression model.
+    This is a wrapper around a GPy GPRegression model.
+
+    Due to the fact that GPy models are instantiated
+    with training data but no such data is available when
+    constructing a BayesOpt object, a level of indirection is
+    required. Instead of passing the surrogate an instantiated
+    GPy model, one must pass a function that will instantiate and
+    then return a model given data. The signature should look like:
+
+    def gp_initialzier(x: np.ndarray, y: np.ndarray):
+        gp = GPy.models.GPRegression(...)
+        ...set constraints, or priors, or whatever...
+        return gp
 
     Parameters
     ----------
-    gp: GaussianProcessRegressor
-        The scikit-learn GP regressor.
+    gp_initizlizer: Callable
+        A function that accepts training data and
+        returns a GPy GP model.
+    n_restarts: Integer (default = 1)
+        The number of restarts during optimization.
     """
 
     def __init__(self, gp_initializer, n_restarts=1):

@@ -118,7 +118,7 @@ def test_predict_returns_correct_dimensions(surrogate):
 def test_test_input_contains_at_least_one_sample(surrogate):
     # ARRANGE
     n_dimensions = 1
-    n_samples = 100
+    n_samples = 10
 
     x_train, y_train = make_regression(n_samples, n_dimensions)
     x_test = np.array([])
@@ -134,7 +134,7 @@ def test_test_input_contains_at_least_one_sample(surrogate):
 def test_test_input_must_be_2d(surrogate):
     # ARRANGE
     n_dimensions = 1
-    n_samples = 100
+    n_samples = 10
 
     x_train, y_train = make_regression(n_samples, n_dimensions)
     x_test = np.zeros((n_samples, n_dimensions, 1))
@@ -215,7 +215,10 @@ def test_GPyGPSurrogate_instantiates_a_gp_after_calling_fit():
     # ARRANGE
     n_dimensions = 1
     n_samples = 10
-    x, y = make_regression(n_samples, n_dimensions)
+
+    x = np.linspace(0.0, 1.0, n_samples).reshape(-1, 1)
+    y = np.sin(x.flatten())
+
     surrogate = gpy_gp_surrogate()
 
     # ACT
@@ -229,8 +232,13 @@ def test_GPyGPSurrogate_updates_data_on_second_call_to_fit():
     # ARRANGE
     n_dimensions = 1
     n_samples = 10
-    x1, y1 = make_regression(n_samples, n_dimensions)
-    x2, y2 = make_regression(n_samples, n_dimensions)
+
+    x1 = np.linspace(0.0, 1.0, n_samples).reshape(-1, 1)
+    y1 = np.sin(x1.flatten())
+
+    x2 = np.linspace(1.0, 2.0, n_samples).reshape(-1, 1)
+    y2 = np.sin(x2.flatten())
+
     surrogate = gpy_gp_surrogate()
     surrogate.fit(x1, y1)
 

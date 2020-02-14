@@ -149,7 +149,7 @@ class GPyGPSurrogate(Surrogate):
         self._optimize_gp()
 
     def _predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        mu, sigma = self.gp.predict(x, full_cov=True)
+        mu, sigma = self.gp.predict_noiseless(x, full_cov=True)
         return mu.flatten(), sigma
 
     def _update_gp(self, x: np.ndarray, y: np.ndarray):

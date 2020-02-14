@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import Any, List, Optional, Tuple
 
 import numpy as np
 
 from .acquisition import AcquisitionFunction
 from .bounds import Bounds
+from .callback import Callback
 from .initial_design import InitialDesign
-from .optimizer import Optimizer
+from .optimizer import Optimizer, OptimizationResult
 from .surrogate import Surrogate
 
 __all__ = ["BayesOpt"]
@@ -108,6 +109,7 @@ class BayesOpt:
     bounds : Bounds
         The parameter bounds for the optimization.
     """
+
     def __init__(
         self,
         objective_function,
@@ -116,6 +118,7 @@ class BayesOpt:
         optimizer: Optimizer,
         initial_design: InitialDesign,
         bounds: Bounds,
+        callbacks: Optional[List[Callback]] = None,
     ):
         self.objective_function = objective_function
         self.surrogate = surrogate
@@ -123,6 +126,7 @@ class BayesOpt:
         self.optimizer = optimizer
         self.initial_design = initial_design
         self.bounds = bounds
+        self.callbacks = callbacks
 
         self.x = np.array([])
         self.y = np.array([])
@@ -206,17 +210,15 @@ class BayesOpt:
         BOTrialResult
             The result from a single BO trial.
         """
-        result = self.optimizer.optimize(
-            self.acquisition_function, self.surrogate, self.bounds
-        )
+        result = self.optimize_acquisition()
 
         x = result.x_min
         y = self.objective_function(x)
 
         self.append_to_dataset(x, y)
 
-        self.surrogate.fit(self.x, self.y)
-        self.acquisition_function.fit(self.x, self.y)
+        self.update_surrogate()
+        self.update_acquisition()
 
         x_opt_so_far, f_of_x_opt_so_far = self.get_opt_so_far()
 
@@ -226,6 +228,27 @@ class BayesOpt:
             x_opt_so_far=x_opt_so_far,
             f_of_x_opt_so_far=f_of_x_opt_so_far,
         )
+
+    def optimize_acquisition(self) -> OptimizationResult:
+        result = self.optimizer.optimize(
+            self.acquisition_function, self.surrogate, self.bounds
+        )
+        self.dispatch("on_acquisition_optimized", self, result)
+
+        return result
+
+    def update_surrogate(self) -> None:
+        self.surrogate.fit(self.x, self.y)
+        self.dispatch("on_surrogate_updated", self)
+
+    def update_acquisition(self) -> None:
+        self.acquisition_function.fit(self.x, self.y)
+        self.dispatch("on_acquisition_updated", self)
+
+    def dispatch(self, event: str, *args: List[Any]) -> None:
+        if self.callbacks:
+            for callback in self.callbacks:
+                getattr(callback, event)(*args)
 
     def append_to_dataset(self, x: np.ndarray, y: np.ndarray) -> None:
         """Append `x` and `y` to the dataset."""

@@ -1,3 +1,4 @@
+import warnings
 from typing import Callable, Tuple
 
 import GPy
@@ -172,10 +173,13 @@ class GPyGPSurrogate(Surrogate):
         return mu.flatten(), sigma
 
     def _update_gp(self, x: np.ndarray, y: np.ndarray):
-        if self.gp is None:
-            self.gp = self.gp_initializer(x, y)
-        else:
-            self.gp.set_XY(x, y)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+
+            if self.gp is None:
+                self.gp = self.gp_initializer(x, y)
+            else:
+                self.gp.set_XY(x, y)
 
     def _optimize_gp(self):
         self.gp.optimize_restarts(self.n_restarts)

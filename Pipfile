@@ -17,9 +17,9 @@ pydoe = "*"
 scikit-learn = "*"
 matplotlib = "*"
 seaborn = "*"
-direct = "*"
 bopy = {editable = true,path = "."}
 gpy = "*"
+scipydirect = "*"
 
 [requires]
 python_version = "3.7"

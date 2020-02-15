@@ -25,7 +25,7 @@ n_trials = 5
 
 
 # Now we define a custom callback to make plots at different stages of the optimization.
-# Well create a figure with `n_trials` rows, each of which has two columns: the first of which
+# We'll create a figure with `n_trials` rows, each of which has two columns: the first of which
 # is plot just before the surrogate is updated; and the second just after.
 class PlottingCallback(Callback):
     def __init__(self):

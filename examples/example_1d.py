@@ -10,8 +10,11 @@ from bopy.bounds import Bound, Bounds
 from bopy.callback import Callback
 from bopy.initial_design import SobolSequenceInitialDesign
 from bopy.optimizer import DirectOptimizer
-from bopy.plotting import (plot_acquisition_function_1D,
-                           plot_optimization_result_1D, plot_surrogate_1D)
+from bopy.plotting import (
+    plot_acquisition_function_1D,
+    plot_optimization_result_1D,
+    plot_surrogate_1D,
+)
 from bopy.surrogate import GPyGPSurrogate
 
 sns.set_style("darkgrid")
@@ -71,7 +74,7 @@ def gp_initializer(x, y):
 
 surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
 
-# Now we create the BO object... 
+# Now we create the BO object...
 bo = BayesOpt(
     objective_function=forrester,
     surrogate=surrogate,

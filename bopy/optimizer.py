@@ -38,10 +38,7 @@ class Optimizer(ABC):
     """
 
     def optimize(
-        self,
-        acquisition_function: AcquisitionFunction,
-        surrogate: Surrogate,
-        bounds: Bounds,
+        self, acquisition_function: AcquisitionFunction, bounds: Bounds,
     ) -> OptimizationResult:
         """Optimize an acquisition function.
 
@@ -52,8 +49,6 @@ class Optimizer(ABC):
         ----------
         acquisition_function: AcquisitionFunction
             The acquisition function.
-        surrogate: Surrogate
-            The surrogate model.
         bounds: Bounds
             The parameter bounds.
 
@@ -62,15 +57,12 @@ class Optimizer(ABC):
         optimization_result: OptimizationResult
             The result of optimization.
         """
-        x_min, f_min = self._optimize(acquisition_function, surrogate, bounds)
+        x_min, f_min = self._optimize(acquisition_function, bounds)
         return OptimizationResult(x_min=x_min, f_min=f_min)
 
     @abstractmethod
     def _optimize(
-        self,
-        acquisition_function: AcquisitionFunction,
-        surrogate: Surrogate,
-        bounds: Bounds,
+        self, acquisition_function: AcquisitionFunction, bounds: Bounds,
     ) -> Tuple[np.ndarray, float]:
         raise NotImplementedError
 
@@ -94,13 +86,10 @@ class DirectOptimizer(Optimizer):
         self.direct_kwargs = direct_kwargs
 
     def _optimize(
-        self,
-        acquisition_function: AcquisitionFunction,
-        surrogate: Surrogate,
-        bounds: Bounds,
+        self, acquisition_function: AcquisitionFunction, bounds: Bounds,
     ) -> Tuple[np.ndarray, float]:
         def wrapped_f(x, _):
-            return acquisition_function(surrogate, x.reshape(1, -1)), 0
+            return acquisition_function(x.reshape(1, -1)), 0
 
         x_min, f_min, _ = solve(
             wrapped_f,

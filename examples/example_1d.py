@@ -40,9 +40,7 @@ class PlottingCallback(Callback):
         ax = self.axs[self.current_trial][0]
 
         plot_surrogate_1D(ax, bo.surrogate, bo.x, bo.y, bo.bounds.bounds[0])
-        plot_acquisition_function_1D(
-            ax, bo.acquisition_function, bo.surrogate, bo.bounds.bounds[0]
-        )
+        plot_acquisition_function_1D(ax, bo.acquisition_function, bo.bounds.bounds[0])
         ax.plot(opt_result.x_min, opt_result.f_min, "r*", label="acquisition min")
 
     def on_surrogate_updated(self, bo):
@@ -73,12 +71,13 @@ def gp_initializer(x, y):
 
 
 surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
+acquistion_function = LCB(surrogate=surrogate)
 
 # Now we create the BO object...
 bo = BayesOpt(
     objective_function=forrester,
     surrogate=surrogate,
-    acquisition_function=LCB(),
+    acquisition_function=acquistion_function,
     optimizer=DirectOptimizer(maxf=100),
     initial_design=SobolSequenceInitialDesign(),
     bounds=Bounds(bounds=[Bound(lower=0.0, upper=1.0)]),

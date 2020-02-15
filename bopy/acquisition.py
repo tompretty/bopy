@@ -21,10 +21,11 @@ class AcquisitionFunction(ABC):
     This class shouldn't be used directly, use a derived class instead.
     """
 
-    def __init__(self):
+    def __init__(self, surrogate: Surrogate):
+        self.surrogate = surrogate
         self.is_fitted = False
 
-    def __call__(self, surrogate: Surrogate, x: np.ndarray) -> np.ndarray:
+    def __call__(self, x: np.ndarray) -> np.ndarray:
         """Evaluate the acquisition function.
 
         Parameters
@@ -44,7 +45,7 @@ class AcquisitionFunction(ABC):
         if not self.is_fitted:
             raise NotFittedError("must call fit before evaluating.")
 
-        return self._f(*surrogate.predict(x))
+        return self._f(*self.surrogate.predict(x))
 
     @abstractmethod
     def _f(self, mean: np.ndarray, sigma: np.ndarray) -> np.ndarray:
@@ -79,8 +80,8 @@ class LCB(AcquisitionFunction):
         The number of stds we subtract from the mean.
     """
 
-    def __init__(self, kappa: float = 2.0):
-        super().__init__()
+    def __init__(self, surrogate: Surrogate, kappa: float = 2.0):
+        super().__init__(surrogate)
         self.kappa = kappa
 
     def _f(self, mean: np.ndarray, sigma: np.ndarray) -> np.ndarray:
@@ -94,8 +95,8 @@ class EI(AcquisitionFunction):
         `ei(x) = -E[|eta - f(x)|+]`
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, surrogate: Surrogate):
+        super().__init__(surrogate)
         self._eta = np.inf
 
     def _f(self, mean: np.ndarray, sigma: np.ndarray):
@@ -117,8 +118,8 @@ class POI(AcquisitionFunction):
         `poi(x) = p(f(x) >= eta)`
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, surrogate: Surrogate):
+        super().__init__(surrogate)
         self._eta = np.inf
 
     def _f(self, mean: np.ndarray, sigma: np.ndarray):

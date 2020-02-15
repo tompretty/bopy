@@ -57,7 +57,6 @@ def plot_surrogate_1D(
 def plot_acquisition_function_1D(
     ax: plt.Axes,
     acquisition_function: AcquisitionFunction,
-    surrogate: Surrogate,
     bound: Bound,
     n_points: int = 100,
 ) -> None:
@@ -70,8 +69,6 @@ def plot_acquisition_function_1D(
         to plot the graph.
     acquisition_function: AcquisitionFunction
         A trained acquisition function.
-    surrogate: Surrogate
-        A trained surrogate model.
     bound: Bound
         The bound on which to plot
         the graph. NB: doesn't have to be
@@ -81,7 +78,7 @@ def plot_acquisition_function_1D(
         to plot the graph.
     """
     x = np.linspace(bound.lower, bound.upper, n_points).reshape(-1, 1)
-    a_x = acquisition_function(surrogate, x)
+    a_x = acquisition_function(x)
 
     ax.plot(x.flatten(), a_x, label="acquisition function")
 

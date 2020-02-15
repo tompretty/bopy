@@ -13,6 +13,16 @@ class Callback:
     overwrite the events they are interested in.
     """
 
+    def on_initial_design_end(self, bo):
+        """Event raised after the initial design has been run.
+        
+        Parameters
+        ----------
+        bo : BayesOpt
+            The BayesOpt object.
+        """
+        pass
+
     def on_acquisition_optimized(self, bo, opt_result: OptimizationResult):
         """Event raised after the acquisition function has been updated.
         
@@ -37,6 +47,26 @@ class Callback:
 
     def on_acquisition_updated(self, bo):
         """Event raised after the acquisition function has been updated.
+        
+        Parameters
+        ----------
+        bo : BayesOpt
+            The BayesOpt object.
+        """
+        pass
+
+    def on_trial_end(self, bo):
+        """Event raised after a single BO trial has been run.
+        
+        Parameters
+        ----------
+        bo : BayesOpt
+            The BayesOpt object.
+        """
+        pass
+
+    def on_bo_end(self, bo):
+        """Event raised after the BayesOpt routine has been run.
         
         Parameters
         ----------

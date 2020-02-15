@@ -25,7 +25,7 @@ n_trials = 5
 
 
 # Now we define a custom callback to make plots at different stages of the optimization.
-# Well create a figure with `n_trials` rows, each of which has two columns: the first of which
+# We'll create a figure with `n_trials` rows, each of which has two columns: the first of which
 # is plot just before the surrogate is updated; and the second just after.
 class PlottingCallback(Callback):
     def __init__(self):
@@ -41,7 +41,7 @@ class PlottingCallback(Callback):
 
         plot_surrogate_1D(ax, bo.surrogate, bo.x, bo.y, bo.bounds.bounds[0])
         plot_acquisition_function_1D(ax, bo.acquisition_function, bo.bounds.bounds[0])
-        ax.plot(opt_result.x_min, opt_result.f_min, "r*", label="acquisition min")
+        plot_optimization_result_1D(ax, opt_result)
 
     def on_surrogate_updated(self, bo):
         # This is called during a BO trial, just after the surrogate has been fit to the new datum.

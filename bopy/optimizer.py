@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Tuple
 
 import numpy as np
-from DIRECT import solve
+from scipydirect import minimize
 
 from .acquisition import AcquisitionFunction
 from .bounds import Bounds
@@ -82,21 +82,20 @@ class DirectOptimizer(Optimizer):
     """
 
     def __init__(self, *direct_args, **direct_kwargs):
-        self.direct_args = direct_args
         self.direct_kwargs = direct_kwargs
 
     def _optimize(
         self, acquisition_function: AcquisitionFunction, bounds: Bounds,
     ) -> Tuple[np.ndarray, float]:
-        def wrapped_f(x, _):
-            return acquisition_function(x.reshape(1, -1)), 0
+        def objective(x):
+            return acquisition_function(x.reshape(1, -1))
 
-        x_min, f_min, _ = solve(
-            wrapped_f,
-            bounds.lowers,
-            bounds.uppers,
-            *self.direct_args,
+        res = minimize(
+            objective,
+            bounds=list(zip(bounds.lowers, bounds.uppers)),
             **self.direct_kwargs
         )
+        x_min = res.x
+        f_min = res.fun
 
         return np.array([x_min]), f_min

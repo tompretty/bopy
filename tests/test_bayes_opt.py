@@ -19,11 +19,12 @@ def bo():
         )
 
     surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
+    acquistion_function = LCB(surrogate=surrogate)
 
     return BayesOpt(
         objective_function=forrester,
         surrogate=surrogate,
-        acquisition_function=LCB(),
+        acquisition_function=acquistion_function,
         optimizer=DirectOptimizer(maxf=100),
         initial_design=UniformRandomInitialDesign(),
         bounds=Bounds(bounds=[Bound(lower=0.0, upper=1.0)]),

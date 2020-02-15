@@ -238,7 +238,7 @@ class BayesOpt:
     def optimize_acquisition(self) -> OptimizationResult:
         """Optimize the acquisition function."""
         result = self.optimizer.optimize(
-            self.acquisition_function, self.surrogate, self.bounds
+            self.acquisition_function, self.bounds
         )
         self.dispatch("on_acquisition_optimized", self, result)
 

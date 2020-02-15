@@ -41,7 +41,7 @@ class PlottingCallback(Callback):
 
         plot_surrogate_1D(ax, bo.surrogate, bo.x, bo.y, bo.bounds.bounds[0])
         plot_acquisition_function_1D(ax, bo.acquisition_function, bo.bounds.bounds[0])
-        ax.plot(opt_result.x_min, opt_result.f_min, "r*", label="acquisition min")
+        plot_optimization_result_1D(ax, opt_result)
 
     def on_surrogate_updated(self, bo):
         # This is called during a BO trial, just after the surrogate has been fit to the new datum.

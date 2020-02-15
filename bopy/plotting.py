@@ -99,6 +99,6 @@ def plot_optimization_result_1D(
     ax.plot(
         optimization_result.x_min,
         optimization_result.f_min,
-        "r+",
+        "r*",
         label="acquisition function min",
     )

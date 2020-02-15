@@ -149,6 +149,8 @@ class BayesOpt:
         initial_design_result = self.run_initial_design(n_initial_design)
         trial_results = self.run_trials(n_trials)
 
+        self.dispatch("on_bo_end", self)
+
         x_opt, f_of_x_opt = self.get_opt_so_far()
 
         return BOResult(
@@ -174,6 +176,8 @@ class BayesOpt:
         x = self.initial_design.generate(self.bounds, n_initial_design)
         y = self.objective_function(x)
         self.append_to_dataset(x, y)
+
+        self.dispatch("on_initial_design_end", self)
 
         self.surrogate.fit(self.x, self.y)
         self.acquisition_function.fit(self.x, self.y)
@@ -219,6 +223,8 @@ class BayesOpt:
 
         self.update_surrogate()
         self.update_acquisition()
+
+        self.dispatch("on_trial_end", self)
 
         x_opt_so_far, f_of_x_opt_so_far = self.get_opt_so_far()
 

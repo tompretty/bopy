@@ -37,9 +37,11 @@ class Optimizer(ABC):
     This class shouldn't be used directly, use a derived class instead.
     """
 
-    def optimize(
-        self, acquisition_function: AcquisitionFunction, bounds: Bounds,
-    ) -> OptimizationResult:
+    def __init__(self, acquisition_function: AcquisitionFunction, bounds: Bounds):
+        self.acquisition_function = acquisition_function
+        self.bounds = bounds
+
+    def optimize(self) -> OptimizationResult:
         """Optimize an acquisition function.
 
         Optimizes the `acquisition_function` over the `surrogate`
@@ -57,13 +59,11 @@ class Optimizer(ABC):
         optimization_result: OptimizationResult
             The result of optimization.
         """
-        x_min, f_min = self._optimize(acquisition_function, bounds)
+        x_min, f_min = self._optimize()
         return OptimizationResult(x_min=x_min, f_min=f_min)
 
     @abstractmethod
-    def _optimize(
-        self, acquisition_function: AcquisitionFunction, bounds: Bounds,
-    ) -> Tuple[np.ndarray, float]:
+    def _optimize(self) -> Tuple[np.ndarray, float]:
         raise NotImplementedError
 
 
@@ -81,18 +81,19 @@ class DirectOptimizer(Optimizer):
         Kwargs passed to DIRECT.solve
     """
 
-    def __init__(self, *direct_args, **direct_kwargs):
+    def __init__(
+        self, acquisition_function: AcquisitionFunction, bounds: Bounds, **direct_kwargs
+    ):
+        super().__init__(acquisition_function, bounds)
         self.direct_kwargs = direct_kwargs
 
-    def _optimize(
-        self, acquisition_function: AcquisitionFunction, bounds: Bounds,
-    ) -> Tuple[np.ndarray, float]:
+    def _optimize(self) -> Tuple[np.ndarray, float]:
         def objective(x):
-            return acquisition_function(x.reshape(1, -1))
+            return self.acquisition_function(x.reshape(1, -1))
 
         res = minimize(
             objective,
-            bounds=list(zip(bounds.lowers, bounds.uppers)),
+            bounds=list(zip(self.bounds.lowers, self.bounds.uppers)),
             **self.direct_kwargs
         )
         x_min = res.x

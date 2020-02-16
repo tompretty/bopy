@@ -72,15 +72,19 @@ def gp_initializer(x, y):
 
 surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
 acquistion_function = LCB(surrogate=surrogate)
+bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
+optimizer = DirectOptimizer(
+    acquisition_function=acquistion_function, bounds=bounds, maxf=100
+)
 
 # Now we create the BO object...
 bo = BayesOpt(
     objective_function=forrester,
     surrogate=surrogate,
     acquisition_function=acquistion_function,
-    optimizer=DirectOptimizer(maxf=100),
+    optimizer=optimizer,
+    bounds=bounds,
     initial_design=SobolSequenceInitialDesign(),
-    bounds=Bounds(bounds=[Bound(lower=0.0, upper=1.0)]),
     callbacks=[PlottingCallback()],
 )
 

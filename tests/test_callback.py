@@ -52,14 +52,18 @@ def test_all_callbacks_are_dispatched():
 
     surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
     acquistion_function = LCB(surrogate=surrogate)
+    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
+    optimizer = DirectOptimizer(
+        acquisition_function=acquistion_function, bounds=bounds, maxf=100
+    )
 
     bo = BayesOpt(
         objective_function=forrester,
         surrogate=surrogate,
         acquisition_function=acquistion_function,
-        optimizer=DirectOptimizer(maxf=100),
+        optimizer=optimizer,
         initial_design=UniformRandomInitialDesign(),
-        bounds=Bounds(bounds=[Bound(lower=0.0, upper=1.0)]),
+        bounds=bounds,
         callbacks=[MyCallback()],
     )
 

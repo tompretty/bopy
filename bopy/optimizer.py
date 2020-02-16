@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 import numpy as np
 from scipydirect import minimize
@@ -35,6 +35,13 @@ class Optimizer(ABC):
     of the objective function.
 
     This class shouldn't be used directly, use a derived class instead.
+
+    Parameters
+    ----------
+    acquisition_function : AcquisitionFunction
+        The acquisition function.
+    bounds : Bounds
+        The parameter bounds.
     """
 
     def __init__(self, acquisition_function: AcquisitionFunction, bounds: Bounds):
@@ -46,13 +53,6 @@ class Optimizer(ABC):
 
         Optimizes the `acquisition_function` over the `surrogate`
         model, within the `bounds`.
-
-        Parameters
-        ----------
-        acquisition_function: AcquisitionFunction
-            The acquisition function.
-        bounds: Bounds
-            The parameter bounds.
 
         Returns
         -------
@@ -71,18 +71,24 @@ class DirectOptimizer(Optimizer):
     """Direct acquisition function Optimizer.
 
     This is a wrapper around the DIRECT
-    global optimizer.
+    global optimizer. Specifically, we use
+    the scipydirect implementation.
 
     Parameters
     ----------
-    direct_args
-        Args passed to DIRECT.solve
-    direct_kwargs
-        Kwargs passed to DIRECT.solve
+    acquisition_function : AcquisitionFunction
+        The acquisition function.
+    bounds : Bounds
+        The parameter bounds.
+    direct_kwargs : Dict[str, Any]
+        Kwargs passed to scipydirect.minimize.
     """
 
     def __init__(
-        self, acquisition_function: AcquisitionFunction, bounds: Bounds, **direct_kwargs
+        self,
+        acquisition_function: AcquisitionFunction,
+        bounds: Bounds,
+        **direct_kwargs: Dict[str, Any]
     ):
         super().__init__(acquisition_function, bounds)
         self.direct_kwargs = direct_kwargs

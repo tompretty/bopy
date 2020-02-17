@@ -11,6 +11,7 @@ from .mixin import FittableMixin
 
 __all__ = ["ScipyGPSurrogate"]
 
+
 class Surrogate(FittableMixin, ABC):
     """Surrogate model base class.
 
@@ -23,6 +24,8 @@ class Surrogate(FittableMixin, ABC):
         super().__init__()
         self.has_been_fitted = False
         self.n_dimensions = -1
+        self.x = np.array([])
+        self.y = np.array([])
 
     def fit(self, x: np.ndarray, y: np.ndarray) -> None:
         """Fit the surrogate model to training data.
@@ -35,8 +38,13 @@ class Surrogate(FittableMixin, ABC):
             The training target.
         """
         self._validate_ok_for_fitting(x, y)
+        self._update_data(x, y)
         self._fit(x, y)
         self._confirm_fit()
+
+    def _update_data(self, x: np.ndarray, y: np.ndarray) -> None:
+        self.x = x
+        self.y = y
 
     @abstractmethod
     def _fit(self, x: np.ndarray, y: np.ndarray) -> None:

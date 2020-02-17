@@ -1,4 +1,5 @@
 import warnings
+from abc import ABC, abstractmethod
 from typing import Callable, Tuple
 
 import GPy
@@ -43,7 +44,7 @@ class FittableMixin:
             )
 
 
-class Surrogate(FittableMixin):
+class Surrogate(FittableMixin, ABC):
     """Surrogate model base class.
 
     A surrogate is a probabilistic model that stands in for the true
@@ -52,6 +53,7 @@ class Surrogate(FittableMixin):
     This class shouldn't be used directly, use a derived class instead."""
 
     def __init__(self):
+        super().__init__()
         self.has_been_fitted = False
         self.n_dimensions = -1
 
@@ -69,6 +71,7 @@ class Surrogate(FittableMixin):
         self._fit(x, y)
         self._confirm_fit()
 
+    @abstractmethod
     def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
         raise NotImplementedError
 
@@ -90,6 +93,7 @@ class Surrogate(FittableMixin):
         self._validate_ok_for_predicting(x)
         return self._predict(x)
 
+    @abstractmethod
     def _predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         raise NotImplementedError
 

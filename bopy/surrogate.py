@@ -121,29 +121,6 @@ class ScipyGPSurrogate(Surrogate):
         return self.gp.predict(x, return_cov=True)
 
 
-class ScipyGPSurrogate(Surrogate):
-    """Scikit-learn GP Surrogate.
-
-    This is a wrapper around the scikit-learn
-    GaussianProcessRegressor model.
-
-    Parameters
-    ----------
-    gp: GaussianProcessRegressor
-        The scikit-learn GP regressor.
-    """
-
-    def __init__(self, gp: GaussianProcessRegressor):
-        super().__init__()
-        self.gp = gp
-
-    def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
-        self.gp.fit(x, y)
-
-    def _predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        return self.gp.predict(x, return_cov=True)
-
-
 class GPyGPSurrogate(Surrogate):
     """GPy GP Surrogate.
 

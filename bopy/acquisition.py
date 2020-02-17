@@ -134,53 +134,44 @@ class POI(AcquisitionFunction):
 
 
 class SequentialBatchAcquisitionFunction(AcquisitionFunction):
-    def __init__(self, surrogate, base_aquisition):
+    def __init__(self, surrogate: Surrogate, base_acquisition: AcquisitionFunction):
         super().__init__(surrogate)
-        self.base_acquisition = base_aquisition
+        self.base_acquisition = base_acquisition
 
-    def __call__(self, x):
+    def __call__(self, x: np.ndarray) -> np.ndarray:
         return self._f(self.base_acquisition(x))
 
-    def _f(self, a_x):
+    @abstractmethod
+    def _f(self, a_x: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
-    def fit(self, x, y):
+    def fit(self, x: np.ndarray, y: np.ndarray) -> None:
         self.base_acquisition.fit(x, y)
 
-    def start_batch(self):
+    def start_batch(self) -> None:
         pass
 
-    def update_with_next_batch_point(self, x):
+    def update_with_next_batch_point(self, optimization_result) -> None:
         pass
 
-    def finish_batch(self):
+    def finish_batch(self) -> None:
         pass
 
 
 class KriggingBeliever(SequentialBatchAcquisitionFunction):
-    def _f(self, a_x):
+    def _f(self, a_x: np.ndarray) -> np.ndarray:
         return a_x
 
-    def start_batch(self):
+    def start_batch(self) -> None:
         self.n_data = len(self.surrogate.x)
 
-    def update_with_next_batch_point(self, x):
-        y_pred, _ = self.surrogate.predict(x)
-        x = np.concatenate((self.surrogate.x, x))
+    def update_with_next_batch_point(self, optimization_result) -> None:
+        y_pred, _ = self.surrogate.predict(optimization_result.x_min)
+        x = np.concatenate((self.surrogate.x, optimization_result.x_min))
         y = np.concatenate((self.surrogate.y, y_pred))
         self.surrogate.fit(x, y)
 
-    def finish_batch(self):
+    def finish_batch(self) -> None:
         x = self.surrogate.x[: self.n_data]
         y = self.surrogate.y[: self.n_data]
         self.surrogate.fit(x, y)
-
-
-class LocalPenalization(SequentialBatchAcquisitionFunction):
-    def _f(self):
-        # base acq * cones
-        pass
-
-    def update_with_next_batch_point(self, x):
-        # compute new cone
-        pass

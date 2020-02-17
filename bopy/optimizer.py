@@ -150,7 +150,7 @@ class SequentialBatchOptimizer(Optimizer):
         for _ in range(self.batch_size):
             res = self.base_optimizer.optimize()
             self.add_to_batch(res)
-            self.acquisition_function.update_with_next_batch_point(res.x_min)
+            self.acquisition_function.update_with_next_batch_point(res)
         self.acquisition_function.finish_batch()
 
         return self.get_batch()

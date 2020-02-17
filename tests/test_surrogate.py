@@ -159,6 +159,21 @@ def test_test_input_must_be_2d(surrogate):
 
 
 @pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
+def test_surrogate_updates_data_references(surrogate):
+    # ARRANGE
+    n_samples = 10
+
+    x_train, y_train = make_dataset(n_samples=n_samples)
+
+    # ACT
+    surrogate.fit(x_train, y_train)
+
+    # ASSERT
+    assert np.array_equal(x_train, surrogate.x)
+    assert np.array_equal(y_train, surrogate.y)
+
+
+@pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
 def test_test_input_must_have_same_number_of_dimensions_as_training_input(surrogate):
     # ARRANGE
     n_dimensions_train = 1

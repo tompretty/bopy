@@ -1,5 +1,7 @@
 import numpy as np
+
 from .exceptions import NotFittedError
+
 
 class FittableMixin:
     # requires class to have self.has_been_fitted, self.n_dimensions
@@ -31,4 +33,3 @@ class FittableMixin:
             raise ValueError(
                 "`x` must have the same number of dimensions as the training data"
             )
-

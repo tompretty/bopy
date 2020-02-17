@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from bopy.acquisition import LCB, KriggingBeliever
-from bopy.benchmark_functions import bohachevsky, forrester
+from bopy.benchmark_functions import forrester
 from bopy.bounds import Bound, Bounds
 from bopy.initial_design import UniformRandomInitialDesign
 from bopy.optimizer import DirectOptimizer, SequentialBatchOptimizer
@@ -18,7 +18,7 @@ def direct_and_surrogate():
 
     surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
     acquistion_function = LCB(surrogate=surrogate)
-    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0), Bound(lower=0.0, upper=1.0)])
+    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
     optimizer = DirectOptimizer(
         acquisition_function=acquistion_function, bounds=bounds, maxf=100
     )
@@ -36,7 +36,7 @@ def sequential_batch_and_surrogate():
 
     base_acquisition = LCB(surrogate=surrogate)
     acquisition_function = KriggingBeliever(
-        surrogate=surrogate, base_aquisition=base_acquisition,
+        surrogate=surrogate, base_acquisition=base_acquisition,
     )
 
     bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
@@ -57,8 +57,8 @@ def sequential_batch_and_surrogate():
 @pytest.mark.parametrize("optimizer, surrogate", [direct_and_surrogate()])
 def test_optimize_returns_correct_shaped_result(optimizer, surrogate):
     # ARRANGE
-    x = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
-    y = bohachevsky(x)
+    x = np.linspace(0, 1, 5).reshape(-1, 1)
+    y = forrester(x)
     surrogate.fit(x, y)
 
     # ACT
@@ -66,7 +66,7 @@ def test_optimize_returns_correct_shaped_result(optimizer, surrogate):
 
     # ASSERT
     assert isinstance(optimization_result.x_min, np.ndarray)
-    assert optimization_result.x_min.shape == (1, 2)
+    assert optimization_result.x_min.shape == (1, 1)
     assert isinstance(optimization_result.f_min, np.ndarray)
     assert optimization_result.f_min.shape == (1,)
 

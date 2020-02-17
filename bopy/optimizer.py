@@ -63,7 +63,7 @@ class Optimizer(ABC):
         return OptimizationResult(x_min=x_min, f_min=f_min)
 
     @abstractmethod
-    def _optimize(self) -> Tuple[np.ndarray, float]:
+    def _optimize(self) -> Tuple[np.ndarray, np.ndarray]:
         raise NotImplementedError
 
 
@@ -93,7 +93,7 @@ class DirectOptimizer(Optimizer):
         super().__init__(acquisition_function, bounds)
         self.direct_kwargs = direct_kwargs
 
-    def _optimize(self) -> Tuple[np.ndarray, float]:
+    def _optimize(self) -> Tuple[np.ndarray, np.ndarray]:
         def objective(x):
             return self.acquisition_function(x.reshape(1, -1))
 
@@ -144,7 +144,7 @@ class SequentialBatchOptimizer(Optimizer):
         self.x_mins = []
         self.f_mins = []
 
-    def _optimize(self):
+    def _optimize(self) -> Tuple[np.ndarray, np.ndarray]:
         self.start_batch()
         self.acquisition_function.start_batch()
         for _ in range(self.batch_size):
@@ -155,16 +155,16 @@ class SequentialBatchOptimizer(Optimizer):
 
         return self.get_batch()
 
-    def start_batch(self):
+    def start_batch(self) -> None:
         """Prepare to start creating a batch."""
         self.x_mins = []
         self.f_mins = []
 
-    def add_to_batch(self, optimization_result: OptimizationResult):
+    def add_to_batch(self, optimization_result: OptimizationResult) -> None:
         """Add the newly selected point to the batch."""
         self.x_mins.append(optimization_result.x_min)
         self.f_mins.append(optimization_result.f_min)
 
-    def get_batch(self):
+    def get_batch(self) -> None:
         """Get the resulting batch."""
         return np.concatenate(self.x_mins), np.concatenate(self.f_mins)

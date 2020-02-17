@@ -131,3 +131,56 @@ class POI(AcquisitionFunction):
 
     def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
         self._eta = np.min(y)
+
+
+class SequentialBatchAcquisitionFunction(AcquisitionFunction):
+    def __init__(self, surrogate, base_aquisition):
+        super().__init__(surrogate)
+        self.base_acquisition = base_aquisition
+
+    def __call__(self, x):
+        return self._f(self.base_acquisition(x))
+
+    def _f(self, a_x):
+        raise NotImplementedError
+
+    def fit(self, x, y):
+        self.base_acquisition.fit(x, y)
+
+    def start_batch(self):
+        pass
+
+    def update_with_next_batch_point(self, x):
+        pass
+
+    def finish_batch(self):
+        pass
+
+
+class KriggingBeliever(SequentialBatchAcquisitionFunction):
+    def _f(self, a_x):
+        return a_x
+
+    def start_batch(self):
+        self.n_data = len(self.surrogate.x)
+
+    def update_with_next_batch_point(self, x):
+        y_pred, _ = self.surrogate.predict(x)
+        x = np.concatenate((self.surrogate.x, x))
+        y = np.concatenate((self.surrogate.y, y_pred))
+        self.surrogate.fit(x, y)
+
+    def finish_batch(self):
+        x = self.surrogate.x[: self.n_data]
+        y = self.surrogate.y[: self.n_data]
+        self.surrogate.fit(x, y)
+
+
+class LocalPenalization(SequentialBatchAcquisitionFunction):
+    def _f(self):
+        # base acq * cones
+        pass
+
+    def update_with_next_batch_point(self, x):
+        # compute new cone
+        pass

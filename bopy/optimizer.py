@@ -106,3 +106,35 @@ class DirectOptimizer(Optimizer):
         f_min = res.fun
 
         return np.array([x_min]), f_min
+
+
+class SequentialBatchOptimizer(Optimizer):
+    def __init__(self, acquisition_function, bounds, base_optimizer, batch_size):
+        super().__init__(acquisition_function, bounds)
+        self.base_optimizer = base_optimizer
+        self.batch_size = batch_size
+
+        self.x_mins = []
+        self.f_mins = []
+
+    def _optimize(self):
+        self.start_batch()
+        self.acquisition_function.start_batch()
+        for _ in range(self.batch_size):
+            res = self.base_optimizer.optimize()
+            self.add_to_batch(res)
+            self.acquisition_function.update_with_next_batch_point(res.x_min)
+        self.acquisition_function.finish_batch()
+
+        return self.get_batch()
+
+    def start_batch(self):
+        self.x_mins = []
+        self.f_mins = []
+
+    def add_to_batch(self, res):
+        self.x_mins.append(res.x_min)
+        self.f_mins.append(res.f_min)
+
+    def get_batch(self):
+        return np.concatenate(self.x_mins), np.stack(self.f_mins)

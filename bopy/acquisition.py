@@ -3,13 +3,13 @@ from abc import ABC, abstractmethod
 import numpy as np
 from scipy.stats import norm
 
-from .exceptions import NotFittedError
+from .mixin import FittableMixin
 from .surrogate import Surrogate
 
 __all__ = ["LCB", "EI", "POI"]
 
 
-class AcquisitionFunction(ABC):
+class AcquisitionFunction(FittableMixin, ABC):
     """An acquisition function.
 
     Acquisition functions navigate the exploration-exploitation
@@ -22,8 +22,10 @@ class AcquisitionFunction(ABC):
     """
 
     def __init__(self, surrogate: Surrogate):
+        super().__init__()
         self.surrogate = surrogate
-        self.is_fitted = False
+        self.has_been_fitted = False
+        self.n_dimensions = -1
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """Evaluate the acquisition function.
@@ -42,9 +44,7 @@ class AcquisitionFunction(ABC):
             The value of the acquisition function
             at `x`.
         """
-        if not self.is_fitted:
-            raise NotFittedError("must call fit before evaluating.")
-
+        self._validate_ok_for_predicting(x)
         return self._f(*self.surrogate.predict(x))
 
     @abstractmethod
@@ -61,8 +61,9 @@ class AcquisitionFunction(ABC):
         y: np.ndarray of shape (n_samples,)
             The training output.
         """
+        self._validate_ok_for_fitting(x, y)
         self._fit(x, y)
-        self.is_fitted = True
+        self._confirm_fit()
 
     def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
         pass

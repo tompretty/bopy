@@ -44,12 +44,22 @@ def noise_free_gpy_gp_surrogate():
 
 
 @pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
-def test_training_data_must_contain_at_least_one_sample(surrogate):
+def test_training_input_must_contain_at_least_one_sample(surrogate):
     # ARRANGE
     x, y = np.array([]), np.array([])
 
     # ACT/ASSERT
-    with pytest.raises(ValueError, match="data must contain at least one sample"):
+    with pytest.raises(ValueError, match="`x` must contain at least one sample"):
+        surrogate.fit(x, y)
+
+
+@pytest.mark.parametrize("surrogate", [scipy_gp_surrogate(), gpy_gp_surrogate()])
+def test_training_target_must_contain_at_least_one_sample(surrogate):
+    # ARRANGE
+    x, y = np.array([1.0]), np.array([])
+
+    # ACT/ASSERT
+    with pytest.raises(ValueError, match="`y` must contain at least one sample"):
         surrogate.fit(x, y)
 
 
@@ -97,7 +107,7 @@ def test_fit_must_be_called_before_predict(surrogate):
     x, y = make_dataset(n_samples=n_samples)
 
     # ACT/ASSERT
-    with pytest.raises(NotFittedError, match="fit must be called before predict"):
+    with pytest.raises(NotFittedError, match="must be fitted first"):
         surrogate.predict(x)
 
 

@@ -17,7 +17,7 @@ class FittableMixin:
 
     The mixin provides 3 functions: 
         - _validate_ok_for_fitting
-        - _confitm_fit
+        - _confirm_fit
         - _validate_ok_for_predicting
 
     Usage might look something like:

@@ -44,7 +44,7 @@ def test_fit_must_be_called_before_evaluating(acquisition, surrogate):
     surrogate.fit(x, y)
 
     # ACT/ASSERT
-    with pytest.raises(NotFittedError, match="must call fit before evaluating."):
+    with pytest.raises(NotFittedError, match="must be fitted first"):
         acquisition(x)
 
 

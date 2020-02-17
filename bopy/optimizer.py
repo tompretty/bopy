@@ -5,7 +5,7 @@ from typing import Any, Dict, Tuple
 import numpy as np
 from scipydirect import minimize
 
-from .acquisition import AcquisitionFunction
+from .acquisition import AcquisitionFunction, SequentialBatchAcquisitionFunction
 from .bounds import Bounds
 from .surrogate import Surrogate
 
@@ -109,7 +109,34 @@ class DirectOptimizer(Optimizer):
 
 
 class SequentialBatchOptimizer(Optimizer):
-    def __init__(self, acquisition_function, bounds, base_optimizer, batch_size):
+    """Sequential Batch Optimizer.
+
+    This is a batch optimizer that selects a batch
+    by sequentially selecting points from a 
+    SequentialBatchAcquisitionFunction. This proceeds
+    by repeatedly optimizing then updating said 
+    acquisition function.
+    
+    Parameters
+    ----------
+    acquisition_function : SequentialBatchAcquisitionFunction
+        The sequential batch acquisition function to be optimized.
+    bounds : Bounds
+        The parameter bounds.
+    base_optimizer : Optimizer
+        The underlying optimizer used to optimize the acquisition
+        function.
+    batch_size : int
+        The size of the batch.
+    """
+
+    def __init__(
+        self,
+        acquisition_function: SequentialBatchAcquisitionFunction,
+        bounds: Bounds,
+        base_optimizer: Optimizer,
+        batch_size: int,
+    ):
         super().__init__(acquisition_function, bounds)
         self.base_optimizer = base_optimizer
         self.batch_size = batch_size
@@ -129,12 +156,15 @@ class SequentialBatchOptimizer(Optimizer):
         return self.get_batch()
 
     def start_batch(self):
+        """Prepare to start creating a batch."""
         self.x_mins = []
         self.f_mins = []
 
-    def add_to_batch(self, res):
-        self.x_mins.append(res.x_min)
-        self.f_mins.append(res.f_min)
+    def add_to_batch(self, optimization_result: OptimizationResult):
+        """Add the newly selected point to the batch."""
+        self.x_mins.append(optimization_result.x_min)
+        self.f_mins.append(optimization_result.f_min)
 
     def get_batch(self):
+        """Get the resulting batch."""
         return np.concatenate(self.x_mins), np.concatenate(self.f_mins)

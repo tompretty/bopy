@@ -16,14 +16,14 @@ class OptimizationResult:
 
     Parameters
     ----------
-    x_min: np.ndarray of shape (n_dimensions, 1)
+    x_min : np.ndarray of shape (batch_size, n_dimensions)
         The argmin.
-    f_min: float
+    f_min : np.ndarray of shape (batch_size,)
         The min.
     """
 
     x_min: np.ndarray
-    f_min: float
+    f_min: np.ndarray
 
 
 class Optimizer(ABC):
@@ -105,7 +105,7 @@ class DirectOptimizer(Optimizer):
         x_min = res.x
         f_min = res.fun
 
-        return np.array([x_min]), f_min
+        return np.array([x_min]), np.array([f_min])
 
 
 class SequentialBatchOptimizer(Optimizer):
@@ -137,4 +137,4 @@ class SequentialBatchOptimizer(Optimizer):
         self.f_mins.append(res.f_min)
 
     def get_batch(self):
-        return np.concatenate(self.x_mins), np.stack(self.f_mins)
+        return np.concatenate(self.x_mins), np.concatenate(self.f_mins)

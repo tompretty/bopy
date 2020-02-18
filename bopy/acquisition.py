@@ -151,7 +151,7 @@ class SequentialBatchAcquisitionFunction(AcquisitionFunction):
     def start_batch(self) -> None:
         pass
 
-    def update_with_next_batch_point(self, optimization_result) -> None:
+    def add_to_batch(self, optimization_result) -> None:
         pass
 
     def finish_batch(self) -> None:
@@ -165,7 +165,7 @@ class KriggingBeliever(SequentialBatchAcquisitionFunction):
     def start_batch(self) -> None:
         self.n_data = len(self.surrogate.x)
 
-    def update_with_next_batch_point(self, optimization_result) -> None:
+    def add_to_batch(self, optimization_result) -> None:
         y_pred, _ = self.surrogate.predict(optimization_result.x_min)
         x = np.concatenate((self.surrogate.x, optimization_result.x_min))
         y = np.concatenate((self.surrogate.y, y_pred))

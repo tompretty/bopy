@@ -5,8 +5,11 @@ from typing import Any, Dict, Tuple
 import numpy as np
 from scipydirect import minimize
 
-from .acquisition import (AcquisitionFunction,
-                          SequentialBatchAcquisitionFunction)
+from .acquisition import (
+    AcquisitionFunction,
+    OneShotBatchAcquisitionFunction,
+    SequentialBatchAcquisitionFunction,
+)
 from .bounds import Bounds
 from .surrogate import Surrogate
 
@@ -172,15 +175,45 @@ class SequentialBatchOptimizer(Optimizer):
 
 
 class OneShotBatchOptimizer(Optimizer):
+    """One-shot Batch Optimizer.
+    
+    The one-shot optimizer selects a batch of points 
+    using just a single global optimization pass.
+    This works by using `base_optimizer` to optimize 
+    the `acquisition_function` and then selecting a batch
+    from all the evaluations using a `strategy`.
+
+    Parameters
+    ----------
+    acquisition_function : OneShotBatchAcquisitionFunction
+        A one-shot batch acquisition function.
+    bounds : Bounds
+        The parameter bounds.
+    base_optimizer : Optimizer
+        The base optimizer that runs global optimization
+        of the acquisition_function.
+    batch_size : int
+        The size of the batch.
+    strategy : OneShotBatchOptimizerStrategy
+        The strategy used to select a batch of points
+        given all the evaluations during a global
+        optimization of the acquisition function.
+    """
+
     def __init__(
-        self, acquisition_function, bounds, base_optimizer, batch_size, strategy
+        self,
+        acquisition_function: OneShotBatchAcquisitionFunction,
+        bounds: Bounds,
+        base_optimizer: Optimizer,
+        batch_size: int,
+        strategy: OneShotBatchOptimizerStrategy,
     ):
         super().__init__(acquisition_function, bounds)
         self.base_optimizer = base_optimizer
         self.batch_size = batch_size
         self.strategy = strategy
 
-    def _optimize(self):
+    def _optimize(self) -> Tuple[np.ndarray, np.ndarray]:
         self.acquisition_function.start_optimization()
         self.base_optimizer.optimize()
         xs, a_xs = self.acquisition_function.get_evaluations()
@@ -189,12 +222,34 @@ class OneShotBatchOptimizer(Optimizer):
 
 
 class OneShotBatchOptimizerStrategy(ABC):
+    """One-shot Batch Optimizer Strategy.
+
+    Strategies implement a `select` method for
+    selecting a batch of trial locations given
+    all of the evaluations of an aquisition function
+    during a single pass of global optimization.
+
+    This class shouldn't be used directly. Use a derived class instead.
+    """
+
     @abstractmethod
-    def select(self, x, a_x, batch_size):
+    def select(
+        self, x: np.ndarray, a_x: np.ndarray, batch_size: int
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Select a batch of points. Must be overwritten by deriving class."""
         raise NotImplementedError
 
 
 class OneShotBatchOptimizerRandomSamplingStrategy(OneShotBatchOptimizerStrategy):
-    def select(self, x, a_x, batch_size):
+    """One-shot Batch Optimizer Random Sampling Strategy.
+
+    The random sampling strategy simply randomly samples 
+    a subset of the acquistion function evaluations.    
+    """
+
+    def select(
+        self, x: np.ndarray, a_x: np.ndarray, batch_size: int
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Select a batch of points by random sampling."""
         indicies = np.random.choice(range(len(x)), size=batch_size)
         return x[indicies], a_x[indicies]

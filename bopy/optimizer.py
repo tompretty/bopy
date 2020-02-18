@@ -181,6 +181,7 @@ class OneShotBatchOptimizer(Optimizer):
         self.strategy = strategy
 
     def _optimize(self):
+        self.acquisition_function.start_optimization()
         self.base_optimizer.optimize()
         xs, a_xs = self.acquisition_function.get_evaluations()
         xs, a_xs = self.strategy.select(xs, a_xs, self.batch_size)

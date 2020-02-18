@@ -234,5 +234,5 @@ class OneShotBatchAcquisitionFunction(AcquisitionFunction):
         return np.concatenate(self.xs), np.concatenate(self.a_xs)
 
     def _log_evaluation(self, x, a_x):
-        self.xs.append(x)
-        self.a_xs.append(a_x)
+        self.xs.append(np.array(x))
+        self.a_xs.append(np.array(a_x))

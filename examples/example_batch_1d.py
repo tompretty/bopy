@@ -88,7 +88,7 @@ bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
 # the SequentialBatchOptimizer for sequentially constructing
 # a batch of points to evaluate.
 base_optimizer = DirectOptimizer(
-    acquisition_function=base_acquisition, bounds=bounds, maxf=100
+    acquisition_function=acquisition_function, bounds=bounds, maxf=100
 )
 optimizer = SequentialBatchOptimizer(
     base_optimizer=base_optimizer,

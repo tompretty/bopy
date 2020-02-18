@@ -131,3 +131,80 @@ class POI(AcquisitionFunction):
 
     def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
         self._eta = np.min(y)
+
+
+class SequentialBatchAcquisitionFunction(AcquisitionFunction):
+    """Sequential batch acquisition function.
+
+    This is the base class for acquisition functions
+    to be used by a SequentialBatchOptimizer. They combine 
+    a base acquistion function with a strategy to update
+    it as new batch points are selected sequentially e.g. 
+    the krigging believer strategy will 'fantasize' a new
+    datapoint as the posterior mean of the surrogate.
+
+    The class shouldn't be used directly. Use a derived class instead.
+
+    Parameters
+    ----------
+    surrogate : Surrogate
+        The surrogate model.
+    base_acquisition : AcquisitionFunction
+        The base acquisition function that is modified 
+        as each new batch point arrives.
+    """
+
+    def __init__(self, surrogate: Surrogate, base_acquisition: AcquisitionFunction):
+        super().__init__(surrogate)
+        self.base_acquisition = base_acquisition
+
+    def __call__(self, x: np.ndarray) -> np.ndarray:
+        return self._f(self.base_acquisition(x))
+
+    @abstractmethod
+    def _f(self, a_x: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
+    def fit(self, x: np.ndarray, y: np.ndarray) -> None:
+        """Fit the acquisition function to training data."""
+        self.base_acquisition.fit(x, y)
+
+    def start_batch(self) -> None:
+        """Prepare to start creating a new batch."""
+        pass
+
+    def add_to_batch(self, optimization_result) -> None:
+        """Update given a new datapoint."""
+        pass
+
+    def finish_batch(self) -> None:
+        """Clean up after finishing a batch."""
+        pass
+
+
+class KriggingBeliever(SequentialBatchAcquisitionFunction):
+    """Krigging believer.
+
+    This sequential batch acquisition function proceeds by 
+    'fantasizing' new datapoints using the posterior mean of
+    the surrogate model. It then updates the surrogate and
+    base acquisition function with this new datapoint allowing 
+    for the next datapoint to be slected by optimizing the updated
+    base acquisiton.
+    """
+    def _f(self, a_x: np.ndarray) -> np.ndarray:
+        return a_x
+
+    def start_batch(self) -> None:
+        self.n_data = len(self.surrogate.x)
+
+    def add_to_batch(self, optimization_result) -> None:
+        y_pred, _ = self.surrogate.predict(optimization_result.x_min)
+        x = np.concatenate((self.surrogate.x, optimization_result.x_min))
+        y = np.concatenate((self.surrogate.y, y_pred))
+        self.surrogate.fit(x, y)
+
+    def finish_batch(self) -> None:
+        x = self.surrogate.x[: self.n_data]
+        y = self.surrogate.y[: self.n_data]
+        self.surrogate.fit(x, y)

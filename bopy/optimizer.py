@@ -5,7 +5,7 @@ from typing import Any, Dict, Tuple
 import numpy as np
 from scipydirect import minimize
 
-from .acquisition import AcquisitionFunction
+from .acquisition import AcquisitionFunction, SequentialBatchAcquisitionFunction
 from .bounds import Bounds
 from .surrogate import Surrogate
 
@@ -16,14 +16,14 @@ class OptimizationResult:
 
     Parameters
     ----------
-    x_min: np.ndarray of shape (n_dimensions, 1)
+    x_min : np.ndarray of shape (batch_size, n_dimensions)
         The argmin.
-    f_min: float
+    f_min : np.ndarray of shape (batch_size,)
         The min.
     """
 
     x_min: np.ndarray
-    f_min: float
+    f_min: np.ndarray
 
 
 class Optimizer(ABC):
@@ -63,7 +63,7 @@ class Optimizer(ABC):
         return OptimizationResult(x_min=x_min, f_min=f_min)
 
     @abstractmethod
-    def _optimize(self) -> Tuple[np.ndarray, float]:
+    def _optimize(self) -> Tuple[np.ndarray, np.ndarray]:
         raise NotImplementedError
 
 
@@ -93,7 +93,7 @@ class DirectOptimizer(Optimizer):
         super().__init__(acquisition_function, bounds)
         self.direct_kwargs = direct_kwargs
 
-    def _optimize(self) -> Tuple[np.ndarray, float]:
+    def _optimize(self) -> Tuple[np.ndarray, np.ndarray]:
         def objective(x):
             return self.acquisition_function(x.reshape(1, -1))
 
@@ -105,4 +105,66 @@ class DirectOptimizer(Optimizer):
         x_min = res.x
         f_min = res.fun
 
-        return np.array([x_min]), f_min
+        return np.array([x_min]), np.array([f_min])
+
+
+class SequentialBatchOptimizer(Optimizer):
+    """Sequential Batch Optimizer.
+
+    This is a batch optimizer that selects a batch
+    by sequentially selecting points from a 
+    SequentialBatchAcquisitionFunction. This proceeds
+    by repeatedly optimizing then updating said 
+    acquisition function.
+    
+    Parameters
+    ----------
+    acquisition_function : SequentialBatchAcquisitionFunction
+        The sequential batch acquisition function to be optimized.
+    bounds : Bounds
+        The parameter bounds.
+    base_optimizer : Optimizer
+        The underlying optimizer used to optimize the acquisition
+        function.
+    batch_size : int
+        The size of the batch.
+    """
+
+    def __init__(
+        self,
+        acquisition_function: SequentialBatchAcquisitionFunction,
+        bounds: Bounds,
+        base_optimizer: Optimizer,
+        batch_size: int,
+    ):
+        super().__init__(acquisition_function, bounds)
+        self.base_optimizer = base_optimizer
+        self.batch_size = batch_size
+
+        self.x_mins = []
+        self.f_mins = []
+
+    def _optimize(self) -> Tuple[np.ndarray, np.ndarray]:
+        self.start_batch()
+        self.acquisition_function.start_batch()
+        for _ in range(self.batch_size):
+            res = self.base_optimizer.optimize()
+            self.add_to_batch(res)
+            self.acquisition_function.add_to_batch(res)
+        self.acquisition_function.finish_batch()
+
+        return self.get_batch()
+
+    def start_batch(self) -> None:
+        """Prepare to start creating a batch."""
+        self.x_mins = []
+        self.f_mins = []
+
+    def add_to_batch(self, optimization_result: OptimizationResult) -> None:
+        """Add the newly selected point to the batch."""
+        self.x_mins.append(optimization_result.x_min)
+        self.f_mins.append(optimization_result.f_min)
+
+    def get_batch(self) -> None:
+        """Get the resulting batch."""
+        return np.concatenate(self.x_mins), np.concatenate(self.f_mins)

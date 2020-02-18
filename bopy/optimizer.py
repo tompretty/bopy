@@ -174,6 +174,40 @@ class SequentialBatchOptimizer(Optimizer):
         return np.concatenate(self.x_mins), np.concatenate(self.f_mins)
 
 
+class OneShotBatchOptimizerStrategy(ABC):
+    """One-shot Batch Optimizer Strategy.
+
+    Strategies implement a `select` method for
+    selecting a batch of trial locations given
+    all of the evaluations of an aquisition function
+    during a single pass of global optimization.
+
+    This class shouldn't be used directly. Use a derived class instead.
+    """
+
+    @abstractmethod
+    def select(
+        self, x: np.ndarray, a_x: np.ndarray, batch_size: int
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Select a batch of points. Must be overwritten by deriving class."""
+        raise NotImplementedError
+
+
+class OneShotBatchOptimizerRandomSamplingStrategy(OneShotBatchOptimizerStrategy):
+    """One-shot Batch Optimizer Random Sampling Strategy.
+
+    The random sampling strategy simply randomly samples 
+    a subset of the acquistion function evaluations.    
+    """
+
+    def select(
+        self, x: np.ndarray, a_x: np.ndarray, batch_size: int
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Select a batch of points by random sampling."""
+        indicies = np.random.choice(range(len(x)), size=batch_size)
+        return x[indicies], a_x[indicies]
+
+
 class OneShotBatchOptimizer(Optimizer):
     """One-shot Batch Optimizer.
     
@@ -220,36 +254,3 @@ class OneShotBatchOptimizer(Optimizer):
         xs, a_xs = self.strategy.select(xs, a_xs, self.batch_size)
         return xs, a_xs
 
-
-class OneShotBatchOptimizerStrategy(ABC):
-    """One-shot Batch Optimizer Strategy.
-
-    Strategies implement a `select` method for
-    selecting a batch of trial locations given
-    all of the evaluations of an aquisition function
-    during a single pass of global optimization.
-
-    This class shouldn't be used directly. Use a derived class instead.
-    """
-
-    @abstractmethod
-    def select(
-        self, x: np.ndarray, a_x: np.ndarray, batch_size: int
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        """Select a batch of points. Must be overwritten by deriving class."""
-        raise NotImplementedError
-
-
-class OneShotBatchOptimizerRandomSamplingStrategy(OneShotBatchOptimizerStrategy):
-    """One-shot Batch Optimizer Random Sampling Strategy.
-
-    The random sampling strategy simply randomly samples 
-    a subset of the acquistion function evaluations.    
-    """
-
-    def select(
-        self, x: np.ndarray, a_x: np.ndarray, batch_size: int
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        """Select a batch of points by random sampling."""
-        indicies = np.random.choice(range(len(x)), size=batch_size)
-        return x[indicies], a_x[indicies]

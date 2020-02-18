@@ -20,7 +20,7 @@ from bopy.surrogate import GPyGPSurrogate
 sns.set_style("darkgrid")
 
 # Let's set up some constants
-n_inital_design = 5
+n_initial_design = 5
 n_trials = 5
 
 
@@ -62,7 +62,7 @@ class PlottingCallback(Callback):
 
 
 # Now we'll set up the main BO object. First we need to create a surrogate model.
-# We'll use a GPy GP surrogate with an RBF kernel. See the GPyGPSurrogate class for
+# We'll use a GPyGPSurrogate with an RBF kernel. See the GPyGPSurrogate class for
 # why we have to create this slightly funky initializer function first.
 def gp_initializer(x, y):
     return GPy.models.GPRegression(
@@ -89,4 +89,4 @@ bo = BayesOpt(
 )
 
 # ...and run!
-bo.run(n_trials=n_trials, n_initial_design=n_inital_design)
+bo.run(n_trials=n_trials, n_initial_design=n_initial_design)

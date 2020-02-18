@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Tuple
 
 import numpy as np
 from scipy.stats import norm
@@ -47,7 +48,6 @@ class AcquisitionFunction(FittableMixin, ABC):
         self._validate_ok_for_predicting(x)
         return self._f(*self.surrogate.predict(x))
 
-    @abstractmethod
     def _f(self, mean: np.ndarray, sigma: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
@@ -192,6 +192,7 @@ class KriggingBeliever(SequentialBatchAcquisitionFunction):
     for the next datapoint to be slected by optimizing the updated
     base acquisiton.
     """
+
     def _f(self, a_x: np.ndarray) -> np.ndarray:
         return a_x
 
@@ -208,3 +209,51 @@ class KriggingBeliever(SequentialBatchAcquisitionFunction):
         x = self.surrogate.x[: self.n_data]
         y = self.surrogate.y[: self.n_data]
         self.surrogate.fit(x, y)
+
+
+class OneShotBatchAcquisitionFunction(AcquisitionFunction):
+    """One-shot Batch Aquisitioon Function.
+
+    One-shot batch aquistion function is a meta acquisition function.
+    Its main job is to log all evaluations of the `base_acquisition` 
+    and provide a `get_evaluations` method to retrieve all of the
+    evaluations. 
+    
+    Parameters
+    ----------
+    surrogate : Surrogate
+        The surrogate function.
+    base_acquisition : AcquisitionFunction
+        The base acquisition function to log
+        evaluations of.
+    """
+
+    def __init__(self, surrogate: Surrogate, base_acquisition: AcquisitionFunction):
+        super().__init__(surrogate)
+        self.base_acquisiton = base_acquisition
+
+        self.xs = []
+        self.a_xs = []
+
+    def __call__(self, x):
+        a_x = self.base_acquisiton(x)
+        self._log_evaluation(x, a_x)
+        return a_x
+
+    def fit(self, x: np.ndarray, y: np.ndarray) -> None:
+        """Fit the acquisition function to training data."""
+        self.base_acquisiton.fit(x, y)
+
+    def start_optimization(self) -> None:
+        """Prepare to start a new global optimization pass."""
+        self.xs = []
+        self.a_xs = []
+
+    def get_evaluations(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Get all of the function evaluations."""
+        return np.concatenate(self.xs), np.concatenate(self.a_xs)
+
+    def _log_evaluation(self, x: np.ndarray, a_x: np.ndarray) -> None:
+        """Log a single evaluation."""
+        self.xs.append(np.array(x))
+        self.a_xs.append(np.array(a_x))

@@ -5,7 +5,8 @@ from typing import Any, Dict, Tuple
 import numpy as np
 from scipydirect import minimize
 
-from .acquisition import AcquisitionFunction, SequentialBatchAcquisitionFunction
+from .acquisition import (AcquisitionFunction,
+                          SequentialBatchAcquisitionFunction)
 from .bounds import Bounds
 from .surrogate import Surrogate
 
@@ -168,3 +169,31 @@ class SequentialBatchOptimizer(Optimizer):
     def get_batch(self) -> None:
         """Get the resulting batch."""
         return np.concatenate(self.x_mins), np.concatenate(self.f_mins)
+
+
+class OneShotBatchOptimizer(Optimizer):
+    def __init__(
+        self, acquisition_function, bounds, base_optimizer, batch_size, strategy
+    ):
+        super().__init__(acquisition_function, bounds)
+        self.base_optimizer = base_optimizer
+        self.batch_size = batch_size
+        self.strategy = strategy
+
+    def _optimize(self):
+        self.base_optimizer.optimize()
+        xs, a_xs = self.acquisition_function.get_evaluations()
+        xs, a_xs = self.strategy.select(xs, a_xs, self.batch_size)
+        return xs, a_xs
+
+
+class OneShotBatchOptimizerStrategy(ABC):
+    @abstractmethod
+    def select(self, x, a_x, batch_size):
+        raise NotImplementedError
+
+
+class OneShotBatchOptimizerRandomSamplingStrategy(OneShotBatchOptimizerStrategy):
+    def select(self, x, a_x, batch_size):
+        indicies = np.random.choice(range(len(x)), size=batch_size)
+        return x[indicies], a_x[indicies]

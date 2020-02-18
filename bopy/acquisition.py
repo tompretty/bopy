@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Tuple
 
 import numpy as np
 from scipy.stats import norm
@@ -211,7 +212,23 @@ class KriggingBeliever(SequentialBatchAcquisitionFunction):
 
 
 class OneShotBatchAcquisitionFunction(AcquisitionFunction):
-    def __init__(self, surrogate, base_acquisition):
+    """One-shot Batch Aquisitioon Function.
+
+    One-shot batch aquistion function is a meta acquisition function.
+    Its main job is to log all evaluations of the `base_acquisition` 
+    and provide a `get_evaluations` method to retrieve all of the
+    evaluations. 
+    
+    Parameters
+    ----------
+    surrogate : Surrogate
+        The surrogate function.
+    base_acquisition : AcquisitionFunction
+        The base acquisition function to log
+        evaluations of.
+    """
+
+    def __init__(self, surrogate: Surrogate, base_acquisition: AcquisitionFunction):
         super().__init__(surrogate)
         self.base_acquisiton = base_acquisition
 
@@ -223,16 +240,20 @@ class OneShotBatchAcquisitionFunction(AcquisitionFunction):
         self._log_evaluation(x, a_x)
         return a_x
 
-    def fit(self, x, y):
+    def fit(self, x: np.ndarray, y: np.ndarray) -> None:
+        """Fit the acquisition function to training data."""
         self.base_acquisiton.fit(x, y)
 
-    def start_optimization(self):
+    def start_optimization(self) -> None:
+        """Prepare to start a new global optimization pass."""
         self.xs = []
         self.a_xs = []
 
-    def get_evaluations(self):
+    def get_evaluations(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Get all of the function evaluations."""
         return np.concatenate(self.xs), np.concatenate(self.a_xs)
 
-    def _log_evaluation(self, x, a_x):
+    def _log_evaluation(self, x: np.ndarray, a_x: np.ndarray) -> None:
+        """Log a single evaluation."""
         self.xs.append(np.array(x))
         self.a_xs.append(np.array(a_x))

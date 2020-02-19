@@ -15,11 +15,10 @@ jobs:
       - name: Install DIRECT dependencies
         run: |
           sudo apt-get install gfortran -y
-      - name: Install bopy dependencies
+      - name: Install bopy
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pipenv
-          pipenv install --system
+          pip install .
       - name: Test with pytest
         run: |
           pip install pytest

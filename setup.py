@@ -1,4 +1,6 @@
-from setuptools import setup
+from setuptools import Distribution, setup
+
+Distribution().fetch_build_eggs(["numpy"])
 
 setup(
     name="bopy",

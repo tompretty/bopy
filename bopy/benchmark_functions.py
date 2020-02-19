@@ -3,12 +3,12 @@ import numpy as np
 
 def forrester(x: np.ndarray):
     """The forrester function.
-    
+
     Parameters
     ----------
     x : np.ndarray of shape (n_samples, 1)
         The input locations.
-    
+
     Returns
     -------
     np.ndarray of shape (n_samples,)
@@ -19,12 +19,12 @@ def forrester(x: np.ndarray):
 
 def bohachevsky(x: np.ndarray):
     """The bohachevsky function.
-    
+
     Parameters
     ----------
     x : np.ndarray of shape (n_samples, 2)
         The input locations.
-    
+
     Returns
     -------
     np.ndarray of shape (n_samples,)

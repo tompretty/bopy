@@ -3,7 +3,7 @@ import pytest
 
 from bopy.bounds import Bound, Bounds
 from bopy.initial_design import (
-    LatinHyperCubeInitialDesign,
+    LatinHypercubeInitialDesign,
     SobolSequenceInitialDesign,
     UniformRandomInitialDesign,
 )
@@ -14,7 +14,7 @@ from bopy.initial_design import (
     [
         UniformRandomInitialDesign(),
         SobolSequenceInitialDesign(),
-        LatinHyperCubeInitialDesign(),
+        LatinHypercubeInitialDesign(),
     ],
 )
 def test_n_points_must_be_positive(design):
@@ -32,7 +32,7 @@ def test_n_points_must_be_positive(design):
     [
         UniformRandomInitialDesign(),
         SobolSequenceInitialDesign(),
-        LatinHyperCubeInitialDesign(),
+        LatinHypercubeInitialDesign(),
     ],
 )
 def test_points_are_the_correct_shape(design):
@@ -53,7 +53,7 @@ def test_points_are_the_correct_shape(design):
     [
         UniformRandomInitialDesign(),
         SobolSequenceInitialDesign(),
-        LatinHyperCubeInitialDesign(),
+        LatinHypercubeInitialDesign(),
     ],
 )
 def test_points_are_within_bounds(design):

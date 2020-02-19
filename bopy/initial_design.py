@@ -52,8 +52,8 @@ class SobolSequenceInitialDesign(InitialDesign):
         return sobol_seq.i4_sobol_generate(n_dimensions, n_points)
 
 
-class LatinHyperCubeInitialDesign(InitialDesign):
-    """Latin Hyper Cube Initial Design.
+class LatinHypercubeInitialDesign(InitialDesign):
+    """Latin Hypercube Initial Design.
 
     Generates an initial design by from a latin hyper cube over the
     parameter bounds.

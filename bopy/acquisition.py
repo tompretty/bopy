@@ -13,13 +13,10 @@ __all__ = ["LCB", "EI", "POI"]
 class AcquisitionFunction(FittableMixin, ABC):
     """An acquisition function.
 
-    Acquisition functions navigate the exploration-exploitation
-    trade off during optimization. The convention here is that
-    acquistion functions are to be minimized. We should thus
-    think of them as representing expected loss, rather than
-    expected utility.
-
-    This class shouldn't be used directly, use a derived class instead.
+    Acquisition functions navigate the exploration-exploitation trade
+    off during optimization. The convention here is that acquistion
+    functions are to be minimized. We should thus think of them as
+    representing expected loss, rather than expected utility.
     """
 
     def __init__(self, surrogate: Surrogate):
@@ -33,23 +30,22 @@ class AcquisitionFunction(FittableMixin, ABC):
 
         Parameters
         ----------
-        surrogate: Surrogate
-            The surrogate model.
-        x: np.ndarray of shape (n_samples, n_dimensions)
+        x : np.ndarray of shape (n_samples, n_dimensions)
             The input locations at which to evaluate
             the acquisition function.
 
         Returns
         -------
-        a_x: np.ndarray of shape (n_samples,)
+        np.ndarray of shape (n_samples,)
             The value of the acquisition function
             at `x`.
         """
         self._validate_ok_for_predicting(x)
         return self._f(*self.surrogate.predict(x))
 
+    @abstractmethod
     def _f(self, mean: np.ndarray, sigma: np.ndarray) -> np.ndarray:
-        raise NotImplementedError
+        """Evaluate the acquisition function."""
 
     def fit(self, x: np.ndarray, y: np.ndarray) -> None:
         """Fit the acquistion function to training data.
@@ -66,6 +62,7 @@ class AcquisitionFunction(FittableMixin, ABC):
         self._confirm_fit()
 
     def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
+        """Fit the acquisition function to training data."""
         pass
 
 
@@ -137,20 +134,18 @@ class SequentialBatchAcquisitionFunction(AcquisitionFunction):
     """Sequential batch acquisition function.
 
     This is the base class for acquisition functions
-    to be used by a SequentialBatchOptimizer. They combine 
+    to be used by a SequentialBatchOptimizer. They combine
     a base acquistion function with a strategy to update
-    it as new batch points are selected sequentially e.g. 
+    it as new batch points are selected sequentially e.g.
     the krigging believer strategy will 'fantasize' a new
     datapoint as the posterior mean of the surrogate.
-
-    The class shouldn't be used directly. Use a derived class instead.
 
     Parameters
     ----------
     surrogate : Surrogate
         The surrogate model.
     base_acquisition : AcquisitionFunction
-        The base acquisition function that is modified 
+        The base acquisition function that is modified
         as each new batch point arrives.
     """
 
@@ -163,7 +158,7 @@ class SequentialBatchAcquisitionFunction(AcquisitionFunction):
 
     @abstractmethod
     def _f(self, a_x: np.ndarray) -> np.ndarray:
-        raise NotImplementedError
+        """Evaluate the acquisition function."""
 
     def fit(self, x: np.ndarray, y: np.ndarray) -> None:
         """Fit the acquisition function to training data."""
@@ -185,12 +180,11 @@ class SequentialBatchAcquisitionFunction(AcquisitionFunction):
 class KriggingBeliever(SequentialBatchAcquisitionFunction):
     """Krigging believer.
 
-    This sequential batch acquisition function proceeds by 
-    'fantasizing' new datapoints using the posterior mean of
-    the surrogate model. It then updates the surrogate and
-    base acquisition function with this new datapoint allowing 
-    for the next datapoint to be slected by optimizing the updated
-    base acquisiton.
+    This sequential batch acquisition function proceeds by 'fantasizing'
+    new datapoints using the posterior mean of the surrogate model. It
+    then updates the surrogate and base acquisition function with this
+    new datapoint allowing for the next datapoint to be slected by
+    optimizing the updated base acquisiton.
     """
 
     def _f(self, a_x: np.ndarray) -> np.ndarray:
@@ -215,10 +209,10 @@ class OneShotBatchAcquisitionFunction(AcquisitionFunction):
     """One-shot Batch Aquisitioon Function.
 
     One-shot batch aquistion function is a meta acquisition function.
-    Its main job is to log all evaluations of the `base_acquisition` 
+    Its main job is to log all evaluations of the `base_acquisition`
     and provide a `get_evaluations` method to retrieve all of the
-    evaluations. 
-    
+    evaluations.
+
     Parameters
     ----------
     surrogate : Surrogate
@@ -239,6 +233,9 @@ class OneShotBatchAcquisitionFunction(AcquisitionFunction):
         a_x = self.base_acquisiton(x)
         self._log_evaluation(x, a_x)
         return a_x
+
+    def _f(self, a_x: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
 
     def fit(self, x: np.ndarray, y: np.ndarray) -> None:
         """Fit the acquisition function to training data."""

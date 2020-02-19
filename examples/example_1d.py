@@ -39,7 +39,7 @@ class PlottingCallback(Callback):
         # We position it in first column of the `current_trial`th row.
         ax = self.axs[self.current_trial][0]
 
-        plot_surrogate_1D(ax, bo.surrogate, bo.x, bo.y, bo.bounds.bounds[0])
+        plot_surrogate_1D(ax, bo.surrogate, bo.bounds.bounds[0])
         plot_acquisition_function_1D(ax, bo.acquisition_function, bo.bounds.bounds[0])
         plot_optimization_result_1D(ax, opt_result)
 
@@ -49,7 +49,7 @@ class PlottingCallback(Callback):
         # `current_trial`th row.
         ax = self.axs[self.current_trial][1]
 
-        plot_surrogate_1D(ax, bo.surrogate, bo.x, bo.y, bo.bounds.bounds[0])
+        plot_surrogate_1D(ax, bo.surrogate, bo.bounds.bounds[0])
 
     def on_trial_end(self, _):
         # This is called at the end of a BO trial. We just increment our counter keeping track

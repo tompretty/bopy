@@ -7,14 +7,8 @@ from .optimizer import OptimizationResult
 from .surrogate import Surrogate
 
 
-
 def plot_surrogate_1D(
-    ax: plt.Axes,
-    surrogate: Surrogate,
-    x_train: np.ndarray,
-    y_train: np.ndarray,
-    bound: Bound,
-    n_points: int = 100,
+    ax: plt.Axes, surrogate: Surrogate, bound: Bound, n_points: int = 100,
 ) -> None:
     """Plot a 1D surrogate model.
 
@@ -24,10 +18,6 @@ def plot_surrogate_1D(
         matplotlib axes object on which to plot the graph.
     surrogate: Surrogate
         A trained surrogate model.
-    x_train: np.ndarray of shape (n_samples, 1)
-        The training inputs on which the surrogate was trained.
-    y_train: np.ndarray of shape (n_samples,)
-        The training targets on which the surrogate was trained.
     bound: Bound
         The bound on which to plot the graph. NB: doesn't have to be the 
         same as the optimization bound.
@@ -42,7 +32,7 @@ def plot_surrogate_1D(
 
     ax.plot(x.flatten(), y_pred, label="mean")
     ax.fill_between(x.flatten(), lower, upper, alpha=0.5, label="confidence interval")
-    ax.plot(x_train.flatten(), y_train, "k+", label="training data")
+    ax.plot(surrogate.x.flatten(), surrogate.y, "k+", label="training data")
 
 
 def plot_acquisition_function_1D(

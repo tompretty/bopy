@@ -64,7 +64,7 @@ class Optimizer(ABC):
 
     @abstractmethod
     def _optimize(self) -> Tuple[np.ndarray, np.ndarray]:
-        raise NotImplementedError
+        """Optimize an acquisition function."""
 
 
 class DirectOptimizer(Optimizer):

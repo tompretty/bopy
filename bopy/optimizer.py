@@ -51,7 +51,7 @@ class Optimizer(ABC):
     def optimize(self) -> OptimizationResult:
         """Optimize an acquisition function.
 
-        Optimizes the `acquisition_function` over the `surrogate` model, 
+        Optimizes the `acquisition_function` over the `surrogate` model,
         within the `bounds`.
 
         Returns

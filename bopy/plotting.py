@@ -1,13 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 
 from .acquisition import AcquisitionFunction
 from .bounds import Bound
 from .optimizer import OptimizationResult
 from .surrogate import Surrogate
 
-sns.set_style("darkgrid")
 
 
 def plot_surrogate_1D(

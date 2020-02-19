@@ -9,6 +9,7 @@ isort = "*"
 pytest = "*"
 jupyter = "*"
 ipython = "*"
+docformatter = "*"
 
 [packages]
 numpy = "*"

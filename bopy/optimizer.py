@@ -33,12 +33,8 @@ class OptimizationResult:
 class Optimizer(ABC):
     """An acquisition function Optimizer.
 
-    Optimizers find the minimum of a given
-    acquisition function. This minimum is
-    then used as the next query location
-    of the objective function.
-
-    This class shouldn't be used directly, use a derived class instead.
+    Optimizers find the minimum of a given acquisition function. This minimum
+    is then used as the next query location of the objective function.
 
     Parameters
     ----------
@@ -55,8 +51,8 @@ class Optimizer(ABC):
     def optimize(self) -> OptimizationResult:
         """Optimize an acquisition function.
 
-        Optimizes the `acquisition_function` over the `surrogate`
-        model, within the `bounds`.
+        Optimizes the `acquisition_function` over the `surrogate` model, 
+        within the `bounds`.
 
         Returns
         -------
@@ -74,9 +70,8 @@ class Optimizer(ABC):
 class DirectOptimizer(Optimizer):
     """Direct acquisition function Optimizer.
 
-    This is a wrapper around the DIRECT
-    global optimizer. Specifically, we use
-    the scipydirect implementation.
+    This is a wrapper around the DIRECT global optimizer. Specifically,
+    we use the scipydirect implementation.
 
     Parameters
     ----------
@@ -115,12 +110,10 @@ class DirectOptimizer(Optimizer):
 class SequentialBatchOptimizer(Optimizer):
     """Sequential Batch Optimizer.
 
-    This is a batch optimizer that selects a batch
-    by sequentially selecting points from a 
-    SequentialBatchAcquisitionFunction. This proceeds
-    by repeatedly optimizing then updating said 
-    acquisition function.
-    
+    This is a batch optimizer that selects a batch by sequentially selecting
+    points from a SequentialBatchAcquisitionFunction. This proceeds by
+    repeatedly optimizing then updating said acquisition function.
+
     Parameters
     ----------
     acquisition_function : SequentialBatchAcquisitionFunction
@@ -177,27 +170,24 @@ class SequentialBatchOptimizer(Optimizer):
 class OneShotBatchOptimizerStrategy(ABC):
     """One-shot Batch Optimizer Strategy.
 
-    Strategies implement a `select` method for
-    selecting a batch of trial locations given
-    all of the evaluations of an aquisition function
-    during a single pass of global optimization.
-
-    This class shouldn't be used directly. Use a derived class instead.
+    Strategies implement a `select` method for selecting a batch of
+    trial locations given all of the evaluations of an aquisition
+    function during a single pass of global optimization.
     """
 
     @abstractmethod
     def select(
         self, x: np.ndarray, a_x: np.ndarray, batch_size: int
     ) -> Tuple[np.ndarray, np.ndarray]:
-        """Select a batch of points. Must be overwritten by deriving class."""
+        """Select a batch of points."""
         raise NotImplementedError
 
 
 class OneShotBatchOptimizerRandomSamplingStrategy(OneShotBatchOptimizerStrategy):
     """One-shot Batch Optimizer Random Sampling Strategy.
 
-    The random sampling strategy simply randomly samples 
-    a subset of the acquistion function evaluations.    
+    The random sampling strategy simply randomly samples a subset of the
+    acquistion function evaluations.
     """
 
     def select(
@@ -210,12 +200,11 @@ class OneShotBatchOptimizerRandomSamplingStrategy(OneShotBatchOptimizerStrategy)
 
 class OneShotBatchOptimizer(Optimizer):
     """One-shot Batch Optimizer.
-    
-    The one-shot optimizer selects a batch of points 
-    using just a single global optimization pass.
-    This works by using `base_optimizer` to optimize 
-    the `acquisition_function` and then selecting a batch
-    from all the evaluations using a `strategy`.
+
+    The one-shot optimizer selects a batch of points using just a single
+    global optimization pass. This works by using `base_optimizer` to optimize
+    the `acquisition_function` and then selecting a batch from all the evaluations
+    using a `strategy`.
 
     Parameters
     ----------
@@ -224,14 +213,12 @@ class OneShotBatchOptimizer(Optimizer):
     bounds : Bounds
         The parameter bounds.
     base_optimizer : Optimizer
-        The base optimizer that runs global optimization
-        of the acquisition_function.
+        The base optimizer that runs global optimization of the acquisition_function.
     batch_size : int
         The size of the batch.
     strategy : OneShotBatchOptimizerStrategy
-        The strategy used to select a batch of points
-        given all the evaluations during a global
-        optimization of the acquisition function.
+        The strategy used to select a batch of points given all the evaluations
+        during a global optimization of the acquisition function.
     """
 
     def __init__(
@@ -253,4 +240,3 @@ class OneShotBatchOptimizer(Optimizer):
         xs, a_xs = self.acquisition_function.get_evaluations()
         xs, a_xs = self.strategy.select(xs, a_xs, self.batch_size)
         return xs, a_xs
-

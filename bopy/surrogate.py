@@ -45,7 +45,7 @@ class Surrogate(FittableMixin, ABC):
 
     @abstractmethod
     def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
-        raise NotImplementedError
+        """Fit the surrogate model to training data."""
 
     def predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Make a prediction on test data.
@@ -67,7 +67,7 @@ class Surrogate(FittableMixin, ABC):
 
     @abstractmethod
     def _predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        raise NotImplementedError
+        """Make a prediction on test data."""
 
 
 class ScipyGPSurrogate(Surrogate):

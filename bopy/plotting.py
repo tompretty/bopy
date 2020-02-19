@@ -25,23 +25,18 @@ def plot_surrogate_1D(
     Parameters
     ----------
     ax: plt.Axes
-        matplotlib axes object on which
-        to plot the graph.
+        matplotlib axes object on which to plot the graph.
     surrogate: Surrogate
         A trained surrogate model.
     x_train: np.ndarray of shape (n_samples, 1)
-        The training inputs on which
-        the surrogate was trained.
+        The training inputs on which the surrogate was trained.
     y_train: np.ndarray of shape (n_samples,)
-        The training targets on which
-        the surrogate was trained.
+        The training targets on which the surrogate was trained.
     bound: Bound
-        The bound on which to plot
-        the graph. NB: doesn't have to be
-        the same as the optimization bound.
+        The bound on which to plot the graph. NB: doesn't have to be the 
+        same as the optimization bound.
     n_points: int (default = 100)
-        The number of points with with
-        to plot the graph.
+        The number of points with with to plot the graph.
     """
     x = np.linspace(bound.lower, bound.upper, n_points).reshape(-1, 1)
     y_pred, sigma = surrogate.predict(x)
@@ -65,17 +60,14 @@ def plot_acquisition_function_1D(
     Parameters
     ----------
     ax: plt.Axes
-        matplotlib axes object on which
-        to plot the graph.
+        matplotlib axes object on which to plot the graph.
     acquisition_function: AcquisitionFunction
         A trained acquisition function.
     bound: Bound
-        The bound on which to plot
-        the graph. NB: doesn't have to be
-        the same as the optimization bound.
+        The bound on which to plot the graph. NB: doesn't have to be the same as the 
+        optimization bound.
     n_points: int (default = 100)
-        The number of points with with
-        to plot the graph.
+        The number of points with with to plot the graph.
     """
     x = np.linspace(bound.lower, bound.upper, n_points).reshape(-1, 1)
     a_x = acquisition_function(x)
@@ -91,8 +83,7 @@ def plot_optimization_result_1D(
     Parameters
     ----------
     ax: plt.Axes
-        matplotlib axes object on which
-        to plot the graph.
+        matplotlib axes object on which to plot the graph.
     optimization_result:
         The optimization result.
     """

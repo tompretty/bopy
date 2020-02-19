@@ -9,8 +9,6 @@ from sklearn.preprocessing import StandardScaler
 
 from .mixin import FittableMixin
 
-__all__ = ["ScipyGPSurrogate"]
-
 
 class Surrogate(FittableMixin, ABC):
     """Surrogate model base class.

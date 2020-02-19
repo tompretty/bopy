@@ -9,8 +9,6 @@ from .surrogate import Surrogate
 
 sns.set_style("darkgrid")
 
-__all__ = ["plot_surrogate_1D", "plot_acquisition_function_1D"]
-
 
 def plot_surrogate_1D(
     ax: plt.Axes,

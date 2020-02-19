@@ -7,8 +7,6 @@ from scipy.stats import norm
 from .mixin import FittableMixin
 from .surrogate import Surrogate
 
-__all__ = ["LCB", "EI", "POI"]
-
 
 class AcquisitionFunction(FittableMixin, ABC):
     """An acquisition function.

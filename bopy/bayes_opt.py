@@ -10,8 +10,6 @@ from .initial_design import InitialDesign
 from .optimizer import OptimizationResult, Optimizer
 from .surrogate import Surrogate
 
-__all__ = ["BayesOpt"]
-
 
 @dataclass
 class BOInitialDesignResult:

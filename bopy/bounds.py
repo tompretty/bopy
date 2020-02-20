@@ -4,7 +4,7 @@ from typing import List
 
 @dataclass
 class Bound:
-    """A parameter bound
+    """A parameter bound.
 
     Parameters
     ----------
@@ -24,7 +24,7 @@ class Bound:
 
 @dataclass
 class Bounds:
-    """A collection of parameter bounds
+    """A collection of parameter bounds.
 
     Parameters
     ----------
@@ -40,7 +40,7 @@ class Bounds:
 
     @property
     def n_dimensions(self) -> int:
-        """Get the number of dimensions"""
+        """Get the number of dimensions."""
         return len(self.bounds)
 
     @property

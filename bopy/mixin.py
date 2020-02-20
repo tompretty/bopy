@@ -6,16 +6,15 @@ from .exceptions import NotFittedError
 class FittableMixin:
     """A mixin for classes that are 'fittable'.
 
-    FittableMixin provides a means of validating the 
-    values passed to a 'fit-like' and 'predict-like' function
-    without prescribing a specific interface i.e. 'fit' and 
-    'predict'.
+    FittableMixin provides a means of validating the values passed to a 
+    'fit-like' and 'predict-like' function without prescribing a specific 
+    interface i.e. 'fit' and 'predict'.
 
     A class inheriting this mixin requires:
         - has_been_fitted boolean
         - n_dimensions int
 
-    The mixin provides 3 functions: 
+    The mixin provides 3 functions:
         - _validate_ok_for_fitting
         - _confirm_fit
         - _validate_ok_for_predicting
@@ -30,8 +29,7 @@ class FittableMixin:
     def my_custom_predict_method(self, x):
         self._validate_ok_for_predicting(x)
         ...custom predicting logic...
-
-       """
+    """
 
     def _validate_ok_for_fitting(self, x: np.ndarray, y: np.ndarray):
         """Validate `x` and `y` are suitable for fitting."""

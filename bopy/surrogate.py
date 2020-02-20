@@ -9,16 +9,13 @@ from sklearn.preprocessing import StandardScaler
 
 from .mixin import FittableMixin
 
-__all__ = ["ScipyGPSurrogate"]
-
 
 class Surrogate(FittableMixin, ABC):
     """Surrogate model base class.
 
     A surrogate is a probabilistic model that stands in for the true
     objective function during optimization.
-
-    This class shouldn't be used directly, use a derived class instead."""
+    """
 
     def __init__(self):
         super().__init__()
@@ -48,7 +45,7 @@ class Surrogate(FittableMixin, ABC):
 
     @abstractmethod
     def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
-        raise NotImplementedError
+        """Fit the surrogate model to training data."""
 
     def predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Make a prediction on test data.
@@ -70,14 +67,13 @@ class Surrogate(FittableMixin, ABC):
 
     @abstractmethod
     def _predict(self, x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        raise NotImplementedError
+        """Make a prediction on test data."""
 
 
 class ScipyGPSurrogate(Surrogate):
     """Scikit-learn GP Surrogate.
 
-    This is a wrapper around the scikit-learn
-    GaussianProcessRegressor model.
+    This is a wrapper around the scikit-learn GaussianProcessRegressor model.
 
     Parameters
     ----------
@@ -101,12 +97,11 @@ class GPyGPSurrogate(Surrogate):
 
     This is a wrapper around a GPy GPRegression model.
 
-    Due to the fact that GPy models are instantiated
-    with training data but no such data is available when
-    constructing a BayesOpt object, a level of indirection is
-    required. Instead of passing the surrogate an instantiated
-    GPy model, one must pass a function that will instantiate and
-    then return a model given data. The signature should look like:
+    Due to the fact that GPy models are instantiated with training data 
+    but no such data is available when constructing a BayesOpt object, 
+    a level of indirection is required. Instead of passing the surrogate 
+    an instantiated GPy model, one must pass a function that will instantiate 
+    and then return a model given data. The signature should look like: 
 
     def gp_initialzier(x: np.ndarray, y: np.ndarray):
         gp = GPy.models.GPRegression(...)
@@ -116,8 +111,7 @@ class GPyGPSurrogate(Surrogate):
     Parameters
     ----------
     gp_initizlizer: Callable[[np.ndarray, np.ndarray] -> GPy.models.GPRegression]
-        A function that accepts training data and
-        returns a GPy GP model.
+        A function that accepts training data and returns a GPy GP model.
     n_restarts: Integer (default = 1)
         The number of restarts during optimization.
     """

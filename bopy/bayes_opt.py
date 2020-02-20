@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
 import numpy as np
 
@@ -9,8 +9,6 @@ from .callback import Callback
 from .initial_design import InitialDesign
 from .optimizer import OptimizationResult, Optimizer
 from .surrogate import Surrogate
-
-__all__ = ["BayesOpt"]
 
 
 @dataclass
@@ -82,37 +80,33 @@ class BOResult:
 class BayesOpt:
     """Bayesian Optimization (BO).
 
-    BO is a heuristic for global optimization of 
-    black box functions. It involves training a probabilistic
-    surrogate model of the objective which can be queried as
-    a cheap alternative to the true objective. An acquistion
-    function is used to navigate the trade-off between exploring
-    areas of the space in which the model is uncertain, and
-    exploiting the currently known promising areas.
-    
+    BO is a heuristic for global optimization of black box functions. 
+    It involves training a probabilistic surrogate model of the objective 
+    which can be queried as a cheap alternative to the true objective. 
+    An acquistion function is used to navigate the trade-off between exploring
+    areas of the space in which the model is uncertain, and exploiting the
+    currently known promising areas.
+
     Parameters
     ----------
-    objective_function : [type]
+    objective_function : Callable[[np.ndarray], np.ndarray]
         The objective function to be optimized.
     surrogate : Surrogate
-        The probabilistic surrogate model of the
-        true objective.
+        The probabilistic surrogate model of the true objective.
     acquisition_function : AcquisitionFunction
-        The acquisition function that navigates
-        the exploration-exploitation trade-off.
+        The acquisition function that navigates the 
+        exploration-exploitation trade-off.
     optimizer : Optimizer
-        The optimizer used to optimize the
-        acquistion function
+        The optimizer used to optimize the acquistion function
     initial_design : InitialDesign
-        The strategy for initially evaluating 
-        the objective.
+        The strategy for initially evaluating the objective.
     bounds : Bounds
         The parameter bounds for the optimization.
     """
 
     def __init__(
         self,
-        objective_function,
+        objective_function: Callable[[np.ndarray], np.ndarray],
         surrogate: Surrogate,
         acquisition_function: AcquisitionFunction,
         optimizer: Optimizer,
@@ -133,14 +127,14 @@ class BayesOpt:
 
     def run(self, n_trials: int = 10, n_initial_design: int = 5) -> BOResult:
         """Run BO.
-        
+
         Parameters
         ----------
         n_trials : int, optional
             The number of BO trails to run, by default 10
         n_initial_design : int, optional
             The number of initial design points, by default 5
-        
+
         Returns
         -------
         BOResult
@@ -162,12 +156,12 @@ class BayesOpt:
 
     def run_initial_design(self, n_initial_design: int = 5) -> BOInitialDesignResult:
         """Run an initial design.
-        
+
         Parameters
         ----------
         n_initial_design : int, optional
             The number of design points to evaluate, by default 5
-        
+
         Returns
         -------
         BOInitialDesignResult
@@ -193,12 +187,12 @@ class BayesOpt:
 
     def run_trials(self, n_trials: int = 10) -> List[BOTrialResult]:
         """Run `n_trials` BO trials.
-        
+
         Parameters
         ----------
         n_trials : int, optional
             The number of trials to run, by default 10
-        
+
         Returns
         -------
         List[BOTrialResult]
@@ -208,7 +202,7 @@ class BayesOpt:
 
     def run_trial(self) -> BOTrialResult:
         """Run a single BO trial.
-        
+
         Returns
         -------
         BOTrialResult

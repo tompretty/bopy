@@ -142,6 +142,27 @@ def plot_acquisition_function_2D(
     ax.pcolor(xx, yy, zz, cmap="viridis")
 
 
+def plot_optimization_result_2D(
+    ax: plt.Axes, optimization_result: OptimizationResult
+) -> None:
+    """Plot a 2D optimization result.
+
+    Parameters
+    ----------
+    ax: plt.Axes
+        matplotlib axes object on which to plot the graph.
+    optimization_result:
+        The optimization result.
+    """
+    ax.plot(
+        optimization_result.x_min[:, 0],
+        optimization_result.x_min[:, 1],
+        "r*",
+        markersize=9,
+        label="selected point(s)",
+    )
+
+
 def _get_points_for_2d_grid(n_x: int, n_y: int, bounds: Bounds):
     lowers = bounds.lowers
     uppers = bounds.uppers

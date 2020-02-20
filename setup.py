@@ -15,6 +15,7 @@ setup(
         "seaborn",
         "gpy",
         "scipydirect",
+        "dppy",
     ],
     zip_safe=False,
 )

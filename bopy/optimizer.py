@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, Tuple
+from typing import Any, Callable, Dict, Tuple
 
 import numpy as np
+from dppy.finite_dpps import FiniteDPP
 from scipydirect import minimize
 
 from .acquisition import (
@@ -196,6 +197,40 @@ class OneShotBatchOptimizerRandomSamplingStrategy(OneShotBatchOptimizerStrategy)
         """Select a batch of points by random sampling."""
         indicies = np.random.choice(range(len(x)), size=batch_size)
         return x[indicies], a_x[indicies]
+
+
+class OneShotBatchOptimizerKDPPSamplingStrategy(OneShotBatchOptimizerStrategy):
+    """One-shot Batch Optimizer k-DPP Sampling Strategy.
+
+    The k-DPP sampling strategy samples a subset of the acquistion function 
+    evaluations from a k-DPP.    
+
+    Parameters
+    ----------
+    kernel : Callable[[np.ndarray], np.ndarray]
+        The kernel to compute the likelihood matrix for the dpp.
+    alpha : float
+        Small constant added to the diagonal of the likelihood matrix,
+        by defaul 1e-5.
+    """
+
+    def __init__(self, kernel: Callable[[np.ndarray], np.ndarray], alpha: float = 1e-5):
+        super().__init__()
+        self.kernel = kernel
+        self.alpha = alpha
+
+    def select(
+        self, x: np.ndarray, a_x: np.ndarray, batch_size: int
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Select a batch of points by sampling from a k-dpp."""
+        l = self.kernel(x) + self.alpha * np.eye(len(x))
+
+        dpp = FiniteDPP("likelihood", L=l)
+        dpp.sample_exact_k_dpp(size=batch_size)
+
+        indices = dpp.list_of_samples[0]
+
+        return x[indices], a_x[indices]
 
 
 class OneShotBatchOptimizer(Optimizer):

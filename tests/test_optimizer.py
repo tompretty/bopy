@@ -8,6 +8,7 @@ from bopy.bounds import Bound, Bounds
 from bopy.optimizer import (
     DirectOptimizer,
     OneShotBatchOptimizer,
+    OneShotBatchOptimizerKDPPSamplingStrategy,
     OneShotBatchOptimizerRandomSamplingStrategy,
     SequentialBatchOptimizer,
 )
@@ -58,7 +59,7 @@ def sequential_batch_and_surrogate():
     return optimizer, surrogate
 
 
-def one_shot_batch_and_surrogate():
+def one_shot_batch_and_surrogate(strategy):
     def gp_initializer(x, y):
         return GPy.models.GPRegression(
             x, y, kernel=GPy.kern.RBF(input_dim=1), noise_var=1e-5, normalizer=True
@@ -81,10 +82,16 @@ def one_shot_batch_and_surrogate():
         bounds=bounds,
         base_optimizer=base_optimizer,
         batch_size=2,
-        strategy=OneShotBatchOptimizerRandomSamplingStrategy(),
+        strategy=strategy,
     )
 
     return optimizer, surrogate
+
+
+def kdpp_rbf_kernel(x):
+    x_sq = np.sum(x * x, 1)[:, None]
+    r2 = x_sq - 2 * x @ x.T + x_sq.T
+    return np.exp(-r2)
 
 
 @pytest.mark.parametrize("optimizer, surrogate", [direct_and_surrogate()])
@@ -107,7 +114,15 @@ def test_optimize_returns_correct_shaped_result(optimizer, surrogate):
 
 @pytest.mark.parametrize(
     "optimizer, surrogate",
-    [sequential_batch_and_surrogate(), one_shot_batch_and_surrogate()],
+    [
+        sequential_batch_and_surrogate(),
+        one_shot_batch_and_surrogate(
+            strategy=OneShotBatchOptimizerRandomSamplingStrategy()
+        ),
+        one_shot_batch_and_surrogate(
+            strategy=OneShotBatchOptimizerKDPPSamplingStrategy(kernel=kdpp_rbf_kernel)
+        ),
+    ],
 )
 def test_batch_optimize_returns_correct_shaped_result(optimizer, surrogate):
     # ARRANGE

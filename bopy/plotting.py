@@ -21,10 +21,10 @@ def plot_surrogate_1D(
     surrogate: Surrogate
         A trained surrogate model.
     bound: Bound
-        The bound on which to plot the graph. NB: doesn't have to be the 
+        The bound on which to plot the graph. NB: doesn't have to be the
         same as the optimization bound.
-    n_points: int (default = 100)
-        The number of points with with to plot the graph.
+    n_points: int
+        The number of points with with to plot the graph, by default 100.
     """
     x = np.linspace(bound.lower, bound.upper, n_points).reshape(-1, 1)
     y_pred, sigma = surrogate.predict(x)
@@ -52,10 +52,10 @@ def plot_acquisition_function_1D(
     acquisition_function: AcquisitionFunction
         A trained acquisition function.
     bound: Bound
-        The bound on which to plot the graph. NB: doesn't have to be the same as the 
+        The bound on which to plot the graph. NB: doesn't have to be the same as the
         optimization bound.
-    n_points: int (default = 100)
-        The number of points with with to plot the graph.
+    n_points: int
+        The number of points with with to plot the graph, by default 100.
     """
     x = np.linspace(bound.lower, bound.upper, n_points).reshape(-1, 1)
     a_x = acquisition_function(x)
@@ -98,11 +98,11 @@ def plot_surrogate_2D(
     surrogate: Surrogate
         A trained surrogate model.
     bounds: Bounds
-        The bounds on which to plot the graph. NB: doesn't have to be the 
+        The bounds on which to plot the graph. NB: doesn't have to be the
         same as the optimization bound.
     n_points: Tuple[int, int]
         The number of x and y points on which to plot the graph,
-        by default (50, 50)
+        by default (50, 50).
     """
     n_x, n_y = n_points
     xx, yy, xs = _get_points_for_2d_grid(n_x, n_y, bounds)
@@ -128,11 +128,11 @@ def plot_acquisition_function_2D(
     acquisition_function: AcquisitionFunction
         A trained acquisition function.
     bounds: Bounds
-        The bounds on which to plot the graph. NB: doesn't have to be the 
+        The bounds on which to plot the graph. NB: doesn't have to be the
         same as the optimization bound.
     n_points: Tuple[int, int]
         The number of x and y points on which to plot the graph,
-        by default (50, 50)
+        by default (50, 50).
     """
     n_x, n_y = n_points
     xx, yy, xs = _get_points_for_2d_grid(n_x, n_y, bounds)
@@ -163,7 +163,10 @@ def plot_optimization_result_2D(
     )
 
 
-def _get_points_for_2d_grid(n_x: int, n_y: int, bounds: Bounds):
+def _get_points_for_2d_grid(
+    n_x: int, n_y: int, bounds: Bounds
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Get meshgrids for plotting and inputs for evaluating."""
     lowers = bounds.lowers
     uppers = bounds.uppers
 

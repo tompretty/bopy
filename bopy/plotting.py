@@ -120,3 +120,41 @@ def plot_surrogate_2D(
 
     ax.pcolor(xx, yy, zz, cmap="viridis")
     ax.plot(surrogate.x[:, 0], surrogate.x[:, 1], "bo", label="training data")
+
+
+def plot_acquisition_function_2D(
+    ax: plt.Axes,
+    acquisition_function: AcquisitionFunction,
+    bounds: Bounds,
+    n_points: Tuple[int, int] = (50, 50),
+) -> None:
+    """Plot a 2D acquisition function.
+
+    Parameters
+    ----------
+    ax: plt.Axes
+        matplotlib axes object on which to plot the graph.
+    acquisition_function: AcquisitionFunction
+        A trained acquisition function.
+    bounds: Bounds
+        The bounds on which to plot the graph. NB: doesn't have to be the 
+        same as the optimization bound.
+    n_points: Tuple[int, int]
+        The number of x and y points on which to plot the graph,
+        by default (50, 50)
+    """
+    n_x, n_y = n_points
+    lowers = bounds.lowers
+    uppers = bounds.uppers
+
+    x = np.linspace(lowers[0], uppers[0], n_x).reshape(-1, 1)
+    y = np.linspace(lowers[1], uppers[1], n_y).reshape(-1, 1)
+
+    xx, yy = np.meshgrid(x, y)
+
+    xs = np.hstack((xx.reshape(-1, 1), yy.reshape(-1, 1)))
+    fxs = acquisition_function(xs)
+
+    zz = fxs.reshape(n_x, n_y)
+
+    ax.pcolor(xx, yy, zz, cmap="viridis")

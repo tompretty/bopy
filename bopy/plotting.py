@@ -105,17 +105,8 @@ def plot_surrogate_2D(
         by default (50, 50)
     """
     n_x, n_y = n_points
-    lowers = bounds.lowers
-    uppers = bounds.uppers
-
-    x = np.linspace(lowers[0], uppers[0], n_x).reshape(-1, 1)
-    y = np.linspace(lowers[1], uppers[1], n_y).reshape(-1, 1)
-
-    xx, yy = np.meshgrid(x, y)
-
-    xs = np.hstack((xx.reshape(-1, 1), yy.reshape(-1, 1)))
+    xx, yy, xs = _get_points_for_2d_grid(n_x, n_y, bounds)
     fxs, _ = surrogate.predict(xs)
-
     zz = fxs.reshape(n_x, n_y)
 
     ax.pcolor(xx, yy, zz, cmap="viridis")
@@ -144,6 +135,14 @@ def plot_acquisition_function_2D(
         by default (50, 50)
     """
     n_x, n_y = n_points
+    xx, yy, xs = _get_points_for_2d_grid(n_x, n_y, bounds)
+    fxs = acquisition_function(xs)
+    zz = fxs.reshape(n_x, n_y)
+
+    ax.pcolor(xx, yy, zz, cmap="viridis")
+
+
+def _get_points_for_2d_grid(n_x: int, n_y: int, bounds: Bounds):
     lowers = bounds.lowers
     uppers = bounds.uppers
 
@@ -151,10 +150,6 @@ def plot_acquisition_function_2D(
     y = np.linspace(lowers[1], uppers[1], n_y).reshape(-1, 1)
 
     xx, yy = np.meshgrid(x, y)
-
     xs = np.hstack((xx.reshape(-1, 1), yy.reshape(-1, 1)))
-    fxs = acquisition_function(xs)
 
-    zz = fxs.reshape(n_x, n_y)
-
-    ax.pcolor(xx, yy, zz, cmap="viridis")
+    return xx, yy, xs

@@ -8,62 +8,47 @@ from bopy.acquisition import EI, LCB, POI
 from bopy.exceptions import NotFittedError
 from bopy.surrogate import ScipyGPSurrogate
 
-
-def ei_and_surrogate():
-    surrogate = ScipyGPSurrogate(gp=GaussianProcessRegressor(kernel=Matern()))
-    ei = EI(surrogate=surrogate)
-
-    return ei, surrogate
+n_samples = 10
 
 
-def lcb_and_surrogate():
-    surrogate = ScipyGPSurrogate(gp=GaussianProcessRegressor(kernel=Matern()))
-    lcb = LCB(surrogate=surrogate)
-
-    return lcb, surrogate
+@pytest.fixture(scope="module", autouse=True)
+def x():
+    return np.linspace(-np.pi, np.pi, n_samples).reshape(-1, 1)
 
 
-def poi_and_surrogate():
-    surrogate = ScipyGPSurrogate(gp=GaussianProcessRegressor(kernel=Matern()))
-    poi = POI(surrogate=surrogate)
-
-    return poi, surrogate
+@pytest.fixture(scope="module", autouse=True)
+def y(x):
+    return np.sin(x).flatten()
 
 
-@pytest.mark.parametrize(
-    "acquisition, surrogate",
-    [ei_and_surrogate(), lcb_and_surrogate(), poi_and_surrogate()],
-)
-def test_fit_must_be_called_before_evaluating(acquisition, surrogate):
-    # ARRANGE
-    n_dimensions = 1
-    n_samples = 10
+@pytest.fixture(scope="module", autouse=True)
+def surrogate():
+    return ScipyGPSurrogate(gp=GaussianProcessRegressor(kernel=Matern()))
 
-    x, y = make_regression(n_samples=n_samples, n_features=n_dimensions)
 
+@pytest.fixture(scope="module", autouse=True)
+def trained_surrogate(surrogate, x, y):
     surrogate.fit(x, y)
-
-    # ACT/ASSERT
-    with pytest.raises(NotFittedError, match="must be fitted first"):
-        acquisition(x)
+    return surrogate
 
 
-@pytest.mark.parametrize(
-    "acquisition, surrogate",
-    [ei_and_surrogate(), lcb_and_surrogate(), poi_and_surrogate()],
-)
-def test_output_dimensions_are_correct(acquisition, surrogate):
-    # ARRANGE
-    n_dimensions = 1
-    n_samples = 10
+@pytest.fixture(scope="class", params=[LCB, EI, POI], ids=["LCB", "EI", "PO"])
+def acquisition(request, trained_surrogate):
+    return request.param(surrogate=trained_surrogate)
 
-    x, y = make_regression(n_samples, n_dimensions)
 
-    surrogate.fit(x, y)
+@pytest.fixture(scope="class")
+def trained_acquisition(acquisition, x, y):
     acquisition.fit(x, y)
+    return acquisition
 
-    # ACT
-    a_x = acquisition(x)
 
-    # ASSERT
-    assert a_x.shape == (n_samples,)
+class TestBeforeFitting:
+    def test_evaluating_raises_not_fitted_error(self, acquisition, x):
+        with pytest.raises(NotFittedError, match="must be fitted first"):
+            acquisition(x)
+
+
+class TestAfterFitting:
+    def test_output_dimensions_are_correct(self, trained_acquisition, x):
+        assert trained_acquisition(x).shape == (n_samples,)

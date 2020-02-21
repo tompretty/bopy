@@ -9,72 +9,57 @@ from bopy.initial_design import (
 )
 
 
-@pytest.mark.parametrize(
-    "design",
-    [
+@pytest.fixture(
+    scope="module",
+    autouse=True,
+    params=[
         UniformRandomInitialDesign(),
         SobolSequenceInitialDesign(),
         LatinHypercubeInitialDesign(),
     ],
+    ids=["uniform", "sobol", "latin"],
 )
-def test_n_points_must_be_positive(design):
-    # ARRANGE
-    n_points = -1
-    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
-
-    # ACT/ASSERT
-    with pytest.raises(ValueError, match="`n_points` must be positive."):
-        design.generate(bounds, n_points)
+def initial_design(request):
+    return request.param
 
 
-@pytest.mark.parametrize(
-    "design",
-    [
-        UniformRandomInitialDesign(),
-        SobolSequenceInitialDesign(),
-        LatinHypercubeInitialDesign(),
-    ],
-)
-def test_points_are_the_correct_shape(design):
-    # ARRANGE
-    n_dimensions = 5
-    n_points = 10
-    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0) for _ in range(n_dimensions)])
-
-    # ACT
-    points = design.generate(bounds, n_points)
-
-    # ASSERT
-    assert points.shape == (n_points, n_dimensions)
+n_dimensions = 10
 
 
-@pytest.mark.parametrize(
-    "design",
-    [
-        UniformRandomInitialDesign(),
-        SobolSequenceInitialDesign(),
-        LatinHypercubeInitialDesign(),
-    ],
-)
-def test_points_are_within_bounds(design):
-    # ARRANGE
-    l_0, u_0 = -10.0, -5.0
-    l_1, u_1 = -5.0, 5.0
-    l_2, u_2 = 5.0, 10.0
-    bounds = Bounds(
-        bounds=[
-            Bound(lower=l_0, upper=u_0),
-            Bound(lower=l_1, upper=u_1),
-            Bound(lower=l_2, upper=u_2),
-        ]
-    )
+@pytest.fixture(scope="module", autouse=True)
+def lowers():
+    return [10.0 * (i + 1) for i in range(n_dimensions)]
 
-    n_points = 100
 
-    # ACT
-    points = design.generate(bounds, n_points)
+@pytest.fixture(scope="module", autouse=True)
+def uppers():
+    return [20.0 * (i + 1) for i in range(n_dimensions)]
 
-    # ASSERT
-    assert np.all(np.logical_and(l_0 <= points[:, 0], points[:, 0] <= u_0))
-    assert np.all(np.logical_and(l_1 <= points[:, 1], points[:, 1] <= u_1))
-    assert np.all(np.logical_and(l_2 <= points[:, 2], points[:, 2] <= u_2))
+
+@pytest.fixture(scope="module", autouse=True)
+def bounds(lowers, uppers):
+    return Bounds(bounds=[Bound(lower=l, upper=u) for l, u in zip(lowers, uppers)])
+
+
+class TestArgumentsToGenerate:
+    def test_n_points_must_be_positive(self, initial_design, bounds):
+        with pytest.raises(ValueError, match="`n_points` must be positive."):
+            initial_design.generate(bounds, n_points=-1)
+
+
+n_points = 5
+
+
+class TestGenerateResults:
+    @pytest.fixture(scope="class", autouse=True)
+    def points(self, initial_design, bounds):
+        return initial_design.generate(bounds, n_points)
+
+    def test_points_is_the_correct_shape(self, points):
+        assert points.shape == (n_points, n_dimensions)
+
+    def test_points_are_within_bounds(self, points, lowers, uppers):
+        for i in range(n_dimensions):
+            assert np.all(
+                np.logical_and(lowers[i] <= points[:, i], points[:, i] <= uppers[i])
+            )

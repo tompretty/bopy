@@ -1,50 +1,41 @@
+import pytest
 from pytest import raises
 
 from bopy.bounds import Bound, Bounds
 
 
-def test_lower_must_be_less_than_upper_bound():
-    # ACT/ASSERT
-    with raises(ValueError):
-        Bound(lower=1.0, upper=0.0)
+class TestBoundCreation:
+    def test_lower_must_be_less_than_upper(self):
+        with raises(ValueError):
+            Bound(lower=1.0, upper=0.0)
 
 
-def test_bounds_requires_at_least_one_bound():
-    # ACT/ASSERT
-    with raises(ValueError, match="`bounds` must contain at least one bound."):
-        Bounds(bounds=[])
+class TestBoundsCreation:
+    def test_at_least_one_bound_is_required(self):
+        with raises(ValueError, match="`bounds` must contain at least one bound."):
+            Bounds(bounds=[])
 
 
-def test_n_dimensions_returns_the_number_of_dimensions():
-    # ARRANGE
+class TestBoundsAfterCreation:
     n_dimensions = 10
 
-    # ACT
-    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0) for _ in range(n_dimensions)])
+    @pytest.fixture(scope="class", autouse=True)
+    def lowers(self):
+        return [i for i in range(1, self.n_dimensions + 1)]
 
-    # ASSERT
-    assert bounds.n_dimensions == n_dimensions
+    @pytest.fixture(scope="class", autouse=True)
+    def uppers(self):
+        return [2 * i for i in range(1, self.n_dimensions + 1)]
 
+    @pytest.fixture(scope="class", autouse=True)
+    def bounds(self, lowers, uppers):
+        return Bounds(bounds=[Bound(lower=l, upper=u) for l, u in zip(lowers, uppers)])
 
-def test_lowers_returns_list_of_lower_bounds():
-    # ARRANGE
-    lowers = [0.0, 1.0, 2.0]
-    uppers = [1.0, 2.0, 3.0]
+    def test_n_dimensions_is_correct(self, bounds):
+        assert bounds.n_dimensions == self.n_dimensions
 
-    # ACT
-    bounds = Bounds(bounds=[Bound(lower=l, upper=u) for l, u in zip(lowers, uppers)])
+    def test_lowers_is_correct(self, bounds, lowers):
+        assert bounds.lowers == lowers
 
-    # ASSERT
-    assert bounds.lowers == lowers
-
-
-def test_uppers_returns_list_of_upper_bounds():
-    # ARRANGE
-    lowers = [0.0, 1.0, 2.0]
-    uppers = [1.0, 2.0, 3.0]
-
-    # ACT
-    bounds = Bounds(bounds=[Bound(lower=l, upper=u) for l, u in zip(lowers, uppers)])
-
-    # ASSERT
-    assert bounds.uppers == uppers
+    def test_uppers_is_correct(self, bounds, uppers):
+        assert bounds.uppers == uppers

@@ -14,128 +14,190 @@ from bopy.optimizer import (
 )
 from bopy.surrogate import GPyGPSurrogate
 
+n_samples = 10
 
-def direct_and_surrogate():
+
+@pytest.fixture(scope="module", autouse=True)
+def x():
+    return np.linspace(0, 1, n_samples).reshape(-1, 1)
+
+
+@pytest.fixture(scope="module", autouse=True)
+def y(x):
+    return forrester(x)
+
+
+@pytest.fixture(scope="module", autouse=True)
+def surrogate():
     def gp_initializer(x, y):
         return GPy.models.GPRegression(
             x, y, kernel=GPy.kern.RBF(input_dim=1), noise_var=1e-5, normalizer=True
         )
 
-    surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
-    acquistion_function = LCB(surrogate=surrogate)
-    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
-    optimizer = DirectOptimizer(
-        acquisition_function=acquistion_function, bounds=bounds, maxf=100
-    )
-
-    return optimizer, surrogate
+    return GPyGPSurrogate(gp_initializer=gp_initializer)
 
 
-def sequential_batch_and_surrogate():
-    def gp_initializer(x, y):
-        return GPy.models.GPRegression(
-            x, y, kernel=GPy.kern.RBF(input_dim=1), noise_var=1e-5, normalizer=True
-        )
-
-    surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
-
-    base_acquisition = LCB(surrogate=surrogate)
-    acquisition_function = KriggingBeliever(
-        surrogate=surrogate, base_acquisition=base_acquisition,
-    )
-
-    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
-
-    base_optimizer = DirectOptimizer(
-        acquisition_function=acquisition_function, bounds=bounds, maxf=100
-    )
-    optimizer = SequentialBatchOptimizer(
-        base_optimizer=base_optimizer,
-        batch_size=2,
-        acquisition_function=acquisition_function,
-        bounds=bounds,
-    )
-
-    return optimizer, surrogate
-
-
-def one_shot_batch_and_surrogate(strategy):
-    def gp_initializer(x, y):
-        return GPy.models.GPRegression(
-            x, y, kernel=GPy.kern.RBF(input_dim=1), noise_var=1e-5, normalizer=True
-        )
-
-    surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
-
-    base_acquisition = LCB(surrogate=surrogate)
-    acquisition_function = OneShotBatchAcquisitionFunction(
-        surrogate=surrogate, base_acquisition=base_acquisition,
-    )
-
-    bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
-
-    base_optimizer = DirectOptimizer(
-        acquisition_function=acquisition_function, bounds=bounds, maxf=100
-    )
-    optimizer = OneShotBatchOptimizer(
-        acquisition_function=acquisition_function,
-        bounds=bounds,
-        base_optimizer=base_optimizer,
-        batch_size=2,
-        strategy=strategy,
-    )
-
-    return optimizer, surrogate
-
-
-def kdpp_rbf_kernel(x):
-    x_sq = np.sum(x * x, 1)[:, None]
-    r2 = x_sq - 2 * x @ x.T + x_sq.T
-    return np.exp(-r2)
-
-
-@pytest.mark.parametrize("optimizer, surrogate", [direct_and_surrogate()])
-def test_optimize_returns_correct_shaped_result(optimizer, surrogate):
-    # ARRANGE
-    x = np.linspace(0, 1, 5).reshape(-1, 1)
-    y = forrester(x)
+@pytest.fixture(scope="module", autouse=True)
+def trained_surrogate(surrogate, x, y):
     surrogate.fit(x, y)
-    optimizer.acquisition_function.fit(x, y)
-
-    # ACT
-    optimization_result = optimizer.optimize()
-
-    # ASSERT
-    assert isinstance(optimization_result.x_min, np.ndarray)
-    assert optimization_result.x_min.shape == (1, 1)
-    assert isinstance(optimization_result.f_min, np.ndarray)
-    assert optimization_result.f_min.shape == (1,)
+    return surrogate
 
 
-@pytest.mark.parametrize(
-    "optimizer, surrogate",
-    [
-        sequential_batch_and_surrogate(),
-        one_shot_batch_and_surrogate(
-            strategy=OneShotBatchOptimizerRandomSamplingStrategy()
-        ),
-        one_shot_batch_and_surrogate(
-            strategy=OneShotBatchOptimizerKDPPSamplingStrategy(kernel=kdpp_rbf_kernel)
-        ),
-    ],
-)
-def test_batch_optimize_returns_correct_shaped_result(optimizer, surrogate):
-    # ARRANGE
-    x = np.linspace(0, 1, 5).reshape(-1, 1)
-    y = forrester(x)
-    surrogate.fit(x, y)
-    optimizer.acquisition_function.fit(x, y)
+@pytest.fixture(scope="module", autouse=True)
+def acquisition(trained_surrogate):
+    return LCB(surrogate=trained_surrogate)
 
-    # ACT
-    optimization_result = optimizer.optimize()
 
-    # ASSERT
-    assert isinstance(optimization_result.x_min, np.ndarray)
-    assert optimization_result.x_min.shape == (2, 1)
-    assert isinstance(optimization_result.f_min, np.ndarray)
-    assert optimization_result.f_min.shape == (2,)
+@pytest.fixture(scope="module", autouse=True)
+def trained_acquisition(acquisition, x, y):
+    acquisition.fit(x, y)
+    return acquisition
+
+
+@pytest.fixture(scope="module", autouse=True)
+def bounds():
+    return Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
+
+
+class TestBaseOptimizersAfterOptimize:
+    @pytest.fixture(scope="class", autouse=True)
+    def optimizer(self, trained_acquisition, bounds):
+        return DirectOptimizer(
+            acquisition_function=trained_acquisition, bounds=bounds, maxf=100
+        )
+
+    @pytest.fixture(scope="class", autouse=True)
+    def optimization_result(self, optimizer):
+        return optimizer.optimize()
+
+    def test_x_min_is_a_numpy_array(self, optimization_result):
+        assert isinstance(optimization_result.x_min, np.ndarray)
+
+    def test_x_min_is_the_correct_shape(self, optimization_result):
+        assert optimization_result.x_min.shape == (1, 1)
+
+    def test_f_min_is_a_numpy_array(self, optimization_result):
+        assert isinstance(optimization_result.f_min, np.ndarray)
+
+    def test_f_min_is_the_correct_shape(self, optimization_result):
+        assert optimization_result.f_min.shape == (1,)
+
+
+n_batch = 2
+
+
+class TestSequentialBatchOptimizerAfterOptimize:
+    @pytest.fixture(scope="class", autouse=True)
+    def sequential_acquisition(self, trained_surrogate, trained_acquisition):
+        return KriggingBeliever(
+            surrogate=trained_surrogate, base_acquisition=trained_acquisition
+        )
+
+    @pytest.fixture(scope="class", autouse=True)
+    def optimizer(self, sequential_acquisition, bounds):
+        return SequentialBatchOptimizer(
+            acquisition_function=sequential_acquisition,
+            bounds=bounds,
+            base_optimizer=DirectOptimizer(
+                acquisition_function=sequential_acquisition, bounds=bounds, maxf=100
+            ),
+            batch_size=n_batch,
+        )
+
+    @pytest.fixture(scope="class", autouse=True)
+    def optimization_result(self, optimizer):
+        return optimizer.optimize()
+
+    def test_x_min_is_a_numpy_array(self, optimization_result):
+        assert isinstance(optimization_result.x_min, np.ndarray)
+
+    def test_x_min_is_the_correct_shape(self, optimization_result):
+        assert optimization_result.x_min.shape == (n_batch, 1)
+
+    def test_f_min_is_a_numpy_array(self, optimization_result):
+        assert isinstance(optimization_result.f_min, np.ndarray)
+
+    def test_f_min_is_the_correct_shape(self, optimization_result):
+        assert optimization_result.f_min.shape == (n_batch,)
+
+
+class TestOneShotBatchOptimizerAfterOptimize:
+    @pytest.fixture(scope="class", autouse=True)
+    def one_shot_acquistion(self, trained_surrogate, trained_acquisition):
+        return OneShotBatchAcquisitionFunction(
+            surrogate=trained_surrogate, base_acquisition=trained_acquisition
+        )
+
+    @pytest.fixture(scope="class", autouse=True)
+    def one_shot_strategy(self):
+        return OneShotBatchOptimizerRandomSamplingStrategy()
+
+    @pytest.fixture(scope="class", autouse=True)
+    def optimizer(self, one_shot_acquistion, one_shot_strategy, bounds):
+        return OneShotBatchOptimizer(
+            acquisition_function=one_shot_acquistion,
+            bounds=bounds,
+            batch_size=n_batch,
+            strategy=one_shot_strategy,
+            base_optimizer=DirectOptimizer(
+                acquisition_function=one_shot_acquistion, bounds=bounds, maxf=100
+            ),
+        )
+
+    @pytest.fixture(scope="class", autouse=True)
+    def optimization_result(self, optimizer):
+        return optimizer.optimize()
+
+    def test_x_min_is_a_numpy_array(self, optimization_result):
+        assert isinstance(optimization_result.x_min, np.ndarray)
+
+    def test_x_min_is_the_correct_shape(self, optimization_result):
+        assert optimization_result.x_min.shape == (n_batch, 1)
+
+    def test_f_min_is_a_numpy_array(self, optimization_result):
+        assert isinstance(optimization_result.f_min, np.ndarray)
+
+    def test_f_min_is_the_correct_shape(self, optimization_result):
+        assert optimization_result.f_min.shape == (n_batch,)
+
+
+def random_strategy():
+    return OneShotBatchOptimizerRandomSamplingStrategy()
+
+
+def kdpp_strategy():
+    def k(x):
+        x_sq = np.sum(x * x, 1)[:, None]
+        r2 = x_sq - 2 * x @ x.T + x_sq.T
+        return np.exp(-r2)
+
+    return OneShotBatchOptimizerKDPPSamplingStrategy(kernel=k)
+
+
+class TestOneShotBatchOptimizerStrategiesAfterSelect:
+    @pytest.fixture(
+        scope="class",
+        autouse=True,
+        params=[random_strategy(), kdpp_strategy()],
+        ids=["random", "k-dpp"],
+    )
+    def strategy(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", autouse=True)
+    def selection(self, strategy, x, y):
+        return strategy.select(x, y, n_batch)
+
+    @pytest.fixture(scope="class", autouse=True)
+    def x_selected(self, selection):
+        return selection[0]
+
+    @pytest.fixture(scope="class", autouse=True)
+    def y_selected(self, selection):
+        return selection[1]
+
+    def test_x_selected_is_the_correct_shape(self, x_selected):
+        assert x_selected.shape == (n_batch, 1)
+
+    def test_y_selected_is_the_correct_shape(self, y_selected):
+        assert y_selected.shape == (n_batch,)

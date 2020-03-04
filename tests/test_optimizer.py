@@ -89,17 +89,22 @@ n_batch = 2
 class TestSequentialBatchOptimizerAfterOptimize:
     @pytest.fixture(scope="class", autouse=True)
     def sequential_acquisition(self, trained_surrogate, trained_acquisition):
-        return KriggingBeliever(
-            surrogate=trained_surrogate, base_acquisition=trained_acquisition
-        )
+        return KriggingBeliever(base_acquisition=trained_acquisition)
 
     @pytest.fixture(scope="class", autouse=True)
-    def optimizer(self, sequential_acquisition, bounds):
+    def trained_sequential_acquisition(self, sequential_acquisition, x, y):
+        sequential_acquisition.fit(x, y)
+        return sequential_acquisition
+
+    @pytest.fixture(scope="class", autouse=True)
+    def optimizer(self, trained_sequential_acquisition, bounds):
         return SequentialBatchOptimizer(
-            acquisition_function=sequential_acquisition,
+            acquisition_function=trained_sequential_acquisition,
             bounds=bounds,
             base_optimizer=DirectOptimizer(
-                acquisition_function=sequential_acquisition, bounds=bounds, maxf=100
+                acquisition_function=trained_sequential_acquisition,
+                bounds=bounds,
+                maxf=100,
             ),
             batch_size=n_batch,
         )
@@ -123,24 +128,29 @@ class TestSequentialBatchOptimizerAfterOptimize:
 
 class TestOneShotBatchOptimizerAfterOptimize:
     @pytest.fixture(scope="class", autouse=True)
-    def one_shot_acquistion(self, trained_surrogate, trained_acquisition):
-        return OneShotBatchAcquisitionFunction(
-            surrogate=trained_surrogate, base_acquisition=trained_acquisition
-        )
+    def one_shot_acquistion(self, trained_acquisition):
+        return OneShotBatchAcquisitionFunction(base_acquisition=trained_acquisition)
+
+    @pytest.fixture(scope="class", autouse=True)
+    def trained_one_shot_acquistion(self, one_shot_acquistion, x, y):
+        one_shot_acquistion.fit(x, y)
+        return one_shot_acquistion
 
     @pytest.fixture(scope="class", autouse=True)
     def one_shot_strategy(self):
         return OneShotBatchOptimizerRandomSamplingStrategy()
 
     @pytest.fixture(scope="class", autouse=True)
-    def optimizer(self, one_shot_acquistion, one_shot_strategy, bounds):
+    def optimizer(self, trained_one_shot_acquistion, one_shot_strategy, bounds):
         return OneShotBatchOptimizer(
-            acquisition_function=one_shot_acquistion,
+            acquisition_function=trained_one_shot_acquistion,
             bounds=bounds,
             batch_size=n_batch,
             strategy=one_shot_strategy,
             base_optimizer=DirectOptimizer(
-                acquisition_function=one_shot_acquistion, bounds=bounds, maxf=100
+                acquisition_function=trained_one_shot_acquistion,
+                bounds=bounds,
+                maxf=100,
             ),
         )
 

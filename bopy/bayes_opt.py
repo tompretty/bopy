@@ -19,18 +19,18 @@ class BOInitialDesignResult:
     ----------
     xs_selected: np.ndarray of size (n_initial_design, n_dimensions)
         The initial points evaluated.
-    f_of_xs_selected: np.ndarray of size (n_initial_design,)
+    f_selected: np.ndarray of size (n_initial_design,)
         The objective function value at `xs_selected`.
     x_opt_so_far: np.ndarray of size (1, n_dimensions)
         The location of the current optimizer.
-    f_of_x_opt_so_far: float
+    f_opt_so_far: float
         The objective function value at `x_opt_so_far`
     """
 
-    xs_selected: np.ndarray
-    f_of_xs_selected: np.ndarray
+    x_selected: np.ndarray
+    f_selected: np.ndarray
     x_opt_so_far: np.ndarray
-    f_of_x_opt_so_far: float
+    f_opt_so_far: float
 
 
 @dataclass
@@ -39,20 +39,20 @@ class BOTrialResult:
 
     Parameters
     ----------
-    x_selected: np.ndarray of size (1, n_dimensions)
-        The optimizer of the acquisition function.
-    f_of_xs_selected: float
-        The objective function value at `x_selected`.
+    x_selected: np.ndarray of size (n_batch, n_dimensions)
+        The point(s) chosen by the optimizer.
+    f_selected: np.ndarray of size (n_batch,)
+        The objective function value(s) at `x_selected`.
     x_opt_so_far: np.ndarray of size (1, n_dimensions)
         The location of the current optimizer.
-    f_of_x_opt_so_far: float
+    f_opt_so_far: float
         The objective function value at `x_opt_so_far`
     """
 
     x_selected: np.ndarray
-    f_of_x_selected: float
+    f_selected: np.ndarray
     x_opt_so_far: np.ndarray
-    f_of_x_opt_so_far: float
+    f_opt_so_far: float
 
 
 @dataclass
@@ -63,7 +63,7 @@ class BOResult:
     ----------
     x_opt: np.ndarray of size (1, n_dimensions)
         The location of the optimizer.
-    f_of_x_opt: float
+    f_opt: float
         The objective function value at `x_opt`.
     initial_design_result: BOInitialDesignResult
         The result from running the initial design.
@@ -72,7 +72,7 @@ class BOResult:
     """
 
     x_opt: np.ndarray
-    f_of_x_opt: float
+    f_opt: float
     initial_design_result: BOInitialDesignResult
     trial_results: List[BOTrialResult]
 
@@ -145,11 +145,11 @@ class BayesOpt:
 
         self.dispatch("on_bo_end", self)
 
-        x_opt, f_of_x_opt = self.get_opt_so_far()
+        x_opt, f_opt = self.get_opt_so_far()
 
         return BOResult(
             x_opt=x_opt,
-            f_of_x_opt=f_of_x_opt,
+            f_opt=f_opt,
             initial_design_result=initial_design_result,
             trial_results=trial_results,
         )
@@ -176,13 +176,13 @@ class BayesOpt:
         self.surrogate.fit(self.x, self.y)
         self.acquisition_function.fit(self.x, self.y)
 
-        x_opt_so_far, f_of_x_opt_so_far = self.get_opt_so_far()
+        x_opt_so_far, f_opt_so_far = self.get_opt_so_far()
 
         return BOInitialDesignResult(
-            xs_selected=x,
-            f_of_xs_selected=y,
+            x_selected=x,
+            f_selected=y,
             x_opt_so_far=x_opt_so_far,
-            f_of_x_opt_so_far=f_of_x_opt_so_far,
+            f_opt_so_far=f_opt_so_far,
         )
 
     def run_trials(self, n_trials: int = 10) -> List[BOTrialResult]:
@@ -220,13 +220,13 @@ class BayesOpt:
 
         self.dispatch("on_trial_end", self)
 
-        x_opt_so_far, f_of_x_opt_so_far = self.get_opt_so_far()
+        x_opt_so_far, f_opt_so_far = self.get_opt_so_far()
 
         return BOTrialResult(
             x_selected=x,
-            f_of_x_selected=y[0],
+            f_selected=y,
             x_opt_so_far=x_opt_so_far,
-            f_of_x_opt_so_far=f_of_x_opt_so_far,
+            f_opt_so_far=f_opt_so_far,
         )
 
     def optimize_acquisition(self) -> OptimizationResult:
@@ -268,3 +268,4 @@ class BayesOpt:
         f_opt = self.y[index_of_opt]
 
         return x_opt, f_opt
+

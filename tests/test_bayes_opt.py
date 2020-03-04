@@ -1,9 +1,8 @@
 import GPy
-import numpy as np
 import pytest
 
 from bopy.acquisition import LCB
-from bopy.bayes_opt import BayesOpt, BOInitialDesignResult, BOResult, BOTrialResult
+from bopy.bayes_opt import BayesOpt
 from bopy.benchmark_functions import forrester
 from bopy.bounds import Bound, Bounds
 from bopy.initial_design import UniformRandomInitialDesign

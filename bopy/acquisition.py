@@ -39,10 +39,10 @@ class AcquisitionFunction(FittableMixin, ABC):
             at `x`.
         """
         self._validate_ok_for_predicting(x)
-        return self._f(*self.surrogate.predict(x))
+        return self._f(x)
 
     @abstractmethod
-    def _f(self, mean: np.ndarray, sigma: np.ndarray) -> np.ndarray:
+    def _f(self, x: np.ndarray) -> np.ndarray:
         """Evaluate the acquisition function."""
 
     def fit(self, x: np.ndarray, y: np.ndarray) -> None:
@@ -80,7 +80,8 @@ class LCB(AcquisitionFunction):
         super().__init__(surrogate)
         self.kappa = kappa
 
-    def _f(self, mean: np.ndarray, sigma: np.ndarray) -> np.ndarray:
+    def _f(self, x: np.ndarray) -> np.ndarray:
+        mean, sigma = self.surrogate.predict(x)
         return mean - self.kappa * np.sqrt(np.diag(sigma))
 
 
@@ -95,7 +96,8 @@ class EI(AcquisitionFunction):
         super().__init__(surrogate)
         self._eta = np.inf
 
-    def _f(self, mean: np.ndarray, sigma: np.ndarray):
+    def _f(self, x: np.ndarray):
+        mean, sigma = self.surrogate.predict(x)
         var = np.diag(sigma)
         std = np.sqrt(var)
 
@@ -118,7 +120,8 @@ class POI(AcquisitionFunction):
         super().__init__(surrogate)
         self._eta = np.inf
 
-    def _f(self, mean: np.ndarray, sigma: np.ndarray):
+    def _f(self, x: np.ndarray):
+        mean, sigma = self.surrogate.predict(x)
         var = np.diag(sigma)
         std = np.sqrt(var)
 
@@ -140,25 +143,16 @@ class SequentialBatchAcquisitionFunction(AcquisitionFunction):
 
     Parameters
     ----------
-    surrogate : Surrogate
-        The surrogate model.
     base_acquisition : AcquisitionFunction
         The base acquisition function that is modified
         as each new batch point arrives.
     """
 
-    def __init__(self, surrogate: Surrogate, base_acquisition: AcquisitionFunction):
-        super().__init__(surrogate)
+    def __init__(self, base_acquisition: AcquisitionFunction):
+        super().__init__(base_acquisition.surrogate)
         self.base_acquisition = base_acquisition
 
-    def __call__(self, x: np.ndarray) -> np.ndarray:
-        return self._f(self.base_acquisition(x))
-
-    @abstractmethod
-    def _f(self, a_x: np.ndarray) -> np.ndarray:
-        """Evaluate the acquisition function."""
-
-    def fit(self, x: np.ndarray, y: np.ndarray) -> None:
+    def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
         """Fit the acquisition function to training data."""
         self.base_acquisition.fit(x, y)
 
@@ -181,12 +175,12 @@ class KriggingBeliever(SequentialBatchAcquisitionFunction):
     This sequential batch acquisition function proceeds by 'fantasizing'
     new datapoints using the posterior mean of the surrogate model. It
     then updates the surrogate and base acquisition function with this
-    new datapoint allowing for the next datapoint to be slected by
+    new datapoint allowing for the next datapoint to be selected by
     optimizing the updated base acquisiton.
     """
 
-    def _f(self, a_x: np.ndarray) -> np.ndarray:
-        return a_x
+    def _f(self, x: np.ndarray) -> np.ndarray:
+        return self.base_acquisition(x)
 
     def start_batch(self) -> None:
         self.n_data = len(self.surrogate.x)
@@ -213,31 +207,25 @@ class OneShotBatchAcquisitionFunction(AcquisitionFunction):
 
     Parameters
     ----------
-    surrogate : Surrogate
-        The surrogate function.
     base_acquisition : AcquisitionFunction
         The base acquisition function to log
         evaluations of.
     """
 
-    def __init__(self, surrogate: Surrogate, base_acquisition: AcquisitionFunction):
-        super().__init__(surrogate)
-        self.base_acquisiton = base_acquisition
+    def __init__(self, base_acquisition: AcquisitionFunction):
+        super().__init__(base_acquisition.surrogate)
+        self.base_acquisition = base_acquisition
 
         self.xs = []
         self.a_xs = []
 
-    def __call__(self, x):
-        a_x = self.base_acquisiton(x)
+    def _fit(self, x: np.ndarray, y: np.ndarray) -> None:
+        self.base_acquisition.fit(x, y)
+
+    def _f(self, x: np.ndarray) -> np.ndarray:
+        a_x = self.base_acquisition(x)
         self._log_evaluation(x, a_x)
         return a_x
-
-    def _f(self, a_x: np.ndarray) -> np.ndarray:
-        raise NotImplementedError
-
-    def fit(self, x: np.ndarray, y: np.ndarray) -> None:
-        """Fit the acquisition function to training data."""
-        self.base_acquisiton.fit(x, y)
 
     def start_optimization(self) -> None:
         """Prepare to start a new global optimization pass."""

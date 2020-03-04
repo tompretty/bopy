@@ -80,9 +80,7 @@ surrogate = GPyGPSurrogate(gp_initializer=gp_initializer)
 # the krigging believer strategy for sequentially constructing
 # a batch of points to evaluate.
 base_acquisition = LCB(surrogate=surrogate)
-acquisition_function = KriggingBeliever(
-    surrogate=surrogate, base_acquisition=base_acquisition,
-)
+acquisition_function = KriggingBeliever(base_acquisition=base_acquisition,)
 
 bounds = Bounds(bounds=[Bound(lower=0.0, upper=1.0)])
 

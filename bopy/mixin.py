@@ -6,8 +6,8 @@ from .exceptions import NotFittedError
 class FittableMixin:
     """A mixin for classes that are 'fittable'.
 
-    FittableMixin provides a means of validating the values passed to a 
-    'fit-like' and 'predict-like' function without prescribing a specific 
+    FittableMixin provides a means of validating the values passed to a
+    'fit-like' and 'predict-like' function without prescribing a specific
     interface i.e. 'fit' and 'predict'.
 
     A class inheriting this mixin requires:

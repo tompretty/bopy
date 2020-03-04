@@ -80,9 +80,9 @@ class BOResult:
 class BayesOpt:
     """Bayesian Optimization (BO).
 
-    BO is a heuristic for global optimization of black box functions. 
-    It involves training a probabilistic surrogate model of the objective 
-    which can be queried as a cheap alternative to the true objective. 
+    BO is a heuristic for global optimization of black box functions.
+    It involves training a probabilistic surrogate model of the objective
+    which can be queried as a cheap alternative to the true objective.
     An acquistion function is used to navigate the trade-off between exploring
     areas of the space in which the model is uncertain, and exploiting the
     currently known promising areas.
@@ -94,7 +94,7 @@ class BayesOpt:
     surrogate : Surrogate
         The probabilistic surrogate model of the true objective.
     acquisition_function : AcquisitionFunction
-        The acquisition function that navigates the 
+        The acquisition function that navigates the
         exploration-exploitation trade-off.
     optimizer : Optimizer
         The optimizer used to optimize the acquistion function

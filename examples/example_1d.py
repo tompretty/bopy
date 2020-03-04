@@ -1,6 +1,5 @@
 import GPy
 import matplotlib.pyplot as plt
-import numpy as np
 import seaborn as sns
 
 from bopy.acquisition import LCB
@@ -25,8 +24,8 @@ n_trials = 5
 
 
 # Now we define a custom callback to make plots at different stages of the optimization.
-# We'll create a figure with `n_trials` rows, each of which has two columns: the first of which
-# is plot just before the surrogate is updated; and the second just after.
+# We'll create a figure with `n_trials` rows, each of which has two columns: the first
+# of which is plot just before the surrogate is updated; and the second just after.
 class PlottingCallback(Callback):
     def __init__(self):
         super().__init__()
@@ -34,9 +33,10 @@ class PlottingCallback(Callback):
         self.current_trial = 0
 
     def on_acquisition_optimized(self, bo, opt_result):
-        # This is called during a BO trial, just after the acquisiton function has been optimized.
-        # Here we create a plot of the surrogate, acquistion function, and the acquisition optimum.
-        # We position it in first column of the `current_trial`th row.
+        # This is called during a BO trial, just after the acquisiton function has been
+        # optimized. Here we create a plot of the surrogate, acquistion function, and
+        # the acquisition optimum. We position it in first column of the
+        # `current_trial`th row.
         ax = self.axs[self.current_trial][0]
 
         plot_surrogate_1D(ax, bo.surrogate, bo.bounds.bounds[0])
@@ -44,20 +44,21 @@ class PlottingCallback(Callback):
         plot_optimization_result_1D(ax, opt_result)
 
     def on_surrogate_updated(self, bo):
-        # This is called during a BO trial, just after the surrogate has been fit to the new datum.
-        # Here we create a plot of just the surrogate. We position it in the second column of the
-        # `current_trial`th row.
+        # This is called during a BO trial, just after the surrogate has been fit to the
+        # new datum. Here we create a plot of just the surrogate. We position it in the
+        # second column of the `current_trial`th row.
         ax = self.axs[self.current_trial][1]
 
         plot_surrogate_1D(ax, bo.surrogate, bo.bounds.bounds[0])
 
     def on_trial_end(self, _):
-        # This is called at the end of a BO trial. We just increment our counter keeping track
-        # of the current trial.
+        # This is called at the end of a BO trial. We just increment our counter keeping
+        # track of the current trial.
         self.current_trial += 1
 
     def on_bo_end(self, _):
-        # This is called right at the end of the BO routine. We save the figure to a file.
+        # This is called right at the end of the BO routine. We save the figure to a
+        # file.
         self.fig.savefig("example_1d.svg")
 
 

@@ -5,7 +5,6 @@ from typing import Callable, Tuple
 import GPy
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.preprocessing import StandardScaler
 
 from .mixin import FittableMixin
 
@@ -97,11 +96,11 @@ class GPyGPSurrogate(Surrogate):
 
     This is a wrapper around a GPy GPRegression model.
 
-    Due to the fact that GPy models are instantiated with training data 
-    but no such data is available when constructing a BayesOpt object, 
-    a level of indirection is required. Instead of passing the surrogate 
-    an instantiated GPy model, one must pass a function that will instantiate 
-    and then return a model given data. The signature should look like: 
+    Due to the fact that GPy models are instantiated with training data
+    but no such data is available when constructing a BayesOpt object,
+    a level of indirection is required. Instead of passing the surrogate
+    an instantiated GPy model, one must pass a function that will instantiate
+    and then return a model given data. The signature should look like:
 
     def gp_initialzier(x: np.ndarray, y: np.ndarray):
         gp = GPy.models.GPRegression(...)

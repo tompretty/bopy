@@ -12,7 +12,6 @@ from .acquisition import (
     SequentialBatchAcquisitionFunction,
 )
 from .bounds import Bounds
-from .surrogate import Surrogate
 
 
 @dataclass
@@ -202,8 +201,8 @@ class OneShotBatchOptimizerRandomSamplingStrategy(OneShotBatchOptimizerStrategy)
 class OneShotBatchOptimizerKDPPSamplingStrategy(OneShotBatchOptimizerStrategy):
     """One-shot Batch Optimizer k-DPP Sampling Strategy.
 
-    The k-DPP sampling strategy samples a subset of the acquistion function 
-    evaluations from a k-DPP.    
+    The k-DPP sampling strategy samples a subset of the acquistion function
+    evaluations from a k-DPP.
 
     Parameters
     ----------
@@ -223,9 +222,9 @@ class OneShotBatchOptimizerKDPPSamplingStrategy(OneShotBatchOptimizerStrategy):
         self, x: np.ndarray, a_x: np.ndarray, batch_size: int
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Select a batch of points by sampling from a k-dpp."""
-        l = self.kernel(x) + self.alpha * np.eye(len(x))
+        likelihood = self.kernel(x) + self.alpha * np.eye(len(x))
 
-        dpp = FiniteDPP("likelihood", L=l)
+        dpp = FiniteDPP("likelihood", L=likelihood)
         dpp.sample_exact_k_dpp(size=batch_size)
 
         indices = dpp.list_of_samples[0]

@@ -1,5 +1,4 @@
 import GPy
-import numpy as np
 import pytest
 
 from bopy.acquisition import LCB
@@ -42,12 +41,12 @@ def callback():
     class TestCallback(Callback):
         def __init__(self):
             super().__init__()
-            on_initial_design_end_raised = False
-            on_acquisition_optimized_rasied = False
-            on_acquisition_updated_rasied = False
-            on_surrogate_updated_rasied = False
-            on_trial_end_raised = False
-            on_bo_end_raised = False
+            self.on_initial_design_end_raised = False
+            self.on_acquisition_optimized_rasied = False
+            self.on_acquisition_updated_rasied = False
+            self.on_surrogate_updated_rasied = False
+            self.on_trial_end_raised = False
+            self.on_bo_end_raised = False
 
         def on_initial_design_end(self, bo):
             self.on_initial_design_end_raised = True
@@ -91,19 +90,19 @@ def bo_after_running(bo):
 
 class TestAfterRunningBO:
     def test_on_initial_design_end_raised(self, callback):
-        assert callback.on_initial_design_end_raised == True
+        assert callback.on_initial_design_end_raised is True
 
     def test_on_acquistion_optimized_raised(self, callback):
-        assert callback.on_acquisition_optimized_rasied == True
+        assert callback.on_acquisition_optimized_rasied is True
 
     def test_on_acuqisition_updated_raised(self, callback):
-        assert callback.on_acquisition_updated_rasied == True
+        assert callback.on_acquisition_updated_rasied is True
 
     def test_on_surrogate_update_raised(self, callback):
-        assert callback.on_surrogate_updated_rasied == True
+        assert callback.on_surrogate_updated_rasied is True
 
     def test_on_trial_end_raised(self, callback):
-        assert callback.on_trial_end_raised == True
+        assert callback.on_trial_end_raised is True
 
     def test_on_bo_end_raised(self, callback):
-        assert callback.on_bo_end_raised == True
+        assert callback.on_bo_end_raised is True

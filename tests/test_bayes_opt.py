@@ -62,11 +62,11 @@ class TestAfterRunningInitialDesign:
     def initial_design_result(self, bo):
         return bo.run_initial_design(n_initial_design)
 
-    def test_xs_selected_is_the_correct_shape(self, initial_design_result):
-        assert initial_design_result.xs_selected.shape == (n_initial_design, 1)
+    def test_x_selected_is_the_correct_shape(self, initial_design_result):
+        assert initial_design_result.x_selected.shape == (n_initial_design, 1)
 
-    def test_f_of_xs_selected_is_the_correct_shape(self, initial_design_result):
-        assert initial_design_result.f_of_xs_selected.shape == (n_initial_design,)
+    def test_f_selected_is_the_correct_shape(self, initial_design_result):
+        assert initial_design_result.f_selected.shape == (n_initial_design,)
 
     def test_reference_to_x_is_the_correct_shape(self, bo):
         assert bo.x.shape == (n_initial_design, 1)
@@ -80,7 +80,10 @@ class TestAfterRunningTrial:
     def run_trial_result(self, bo_after_initial_design):
         return bo_after_initial_design.run_trial()
 
-    def test_xs_selected_is_the_correct_shape(self, run_trial_result):
+    def test_x_selected_is_the_correct_shape(self, run_trial_result):
+        assert run_trial_result.f_selected.shape == (1,)
+
+    def test_f_selected_is_the_correct_shape(self, run_trial_result):
         assert run_trial_result.x_selected.shape == (1, 1)
 
     def test_reference_to_x_is_the_correct_shape(self, bo):
